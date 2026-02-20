@@ -1,0 +1,62 @@
+import { Suspense } from 'react'
+import { routing } from '@/i18n/routing'
+import { setRequestLocale } from 'next-intl/server'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+import FulltextSearch from '@/components/pages/fulltext-search'
+
+// SSG support
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }))
+}
+
+function SearchLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="bg-blue-600 dark:bg-blue-700 text-white py-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
+            Morrison Pamphlets Database
+          </h1>
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default async function FulltextSearchPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <div className="bg-blue-600 dark:bg-blue-700 text-white py-8">
+            <div className="container mx-auto px-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
+                Morrison Pamphlets Database
+              </h1>
+              <p className="text-center text-blue-100 text-lg">
+                全文検索 / Fulltext Search
+              </p>
+            </div>
+          </div>
+
+          <div className="container mx-auto px-4 py-8">
+            <Suspense fallback={<SearchLoading />}>
+              <FulltextSearch />
+            </Suspense>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}

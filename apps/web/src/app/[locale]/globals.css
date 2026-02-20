@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+@source "../../../../../packages/shared-ui/src/**/*.{ts,tsx}";
+@custom-variant dark (&:where(.dark, .dark *));
+@plugin "@tailwindcss/typography";
+
+@layer base {
+  :root {
+    font-family: var(--font-noto-sans), var(--font-noto-sans-jp), sans-serif;
+    --header-height: 72px;
+  }
+
+  :root:lang(ja) {
+    font-family: var(--font-noto-sans-jp), var(--font-noto-sans), sans-serif;
+  }
+
+  html {
+    scroll-padding-top: calc(var(--header-height) + 16px);
+  }
+}
+
+/* Highlight in search results */
+.search-results em {
+  font-style: normal;
+  background-color: #ff0;
+}

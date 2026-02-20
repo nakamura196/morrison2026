@@ -1,0 +1,104 @@
+{
+  "Common": {
+    "title": "Morrison Pamphlets Integrated Database",
+    "search": "Search",
+    "home": "Home"
+  },
+  "Header": {
+    "search": "Search",
+    "fulltextSearch": "Fulltext",
+    "about": "About",
+    "news": "News",
+    "openMenu": "Open menu",
+    "ja": "日本語",
+    "en": "English"
+  },
+  "SearchPage": {
+    "title": "Search",
+    "search": "Search",
+    "placeholder": "Enter title, author, keyword",
+    "results": "Results",
+    "noResults": "No results found.",
+    "next": "Next",
+    "previous": "Previous",
+    "searchPlaceholder": "Search...",
+    "showing": "Showing",
+    "of": "of",
+    "items": "items",
+    "displaying": "displaying",
+    "noMatchFound": "No results found for",
+    "noResultsAvailable": "No results available.",
+    "searchKeyword": "Search keyword:",
+    "display": "Display:",
+    "sortBy": "Sort by:",
+    "byCount": "By Count",
+    "byName": "By Name",
+    "yes": "Yes",
+    "no": "No",
+    "itemsPerPage": "items per page",
+    "reset": "Reset",
+    "quotationStart": "\"",
+    "quotationEnd": "\"",
+    "searching": "Searching...",
+    "facetSearchPlaceholder": "Filter...",
+    "maxResultsNote": "(Limited to first 10,000 results)"
+  },
+  "ItemPage": {
+    "loading": "Loading...",
+    "bibliographicInfo": "Bibliographic Information",
+    "title": "Title",
+    "author": "Author",
+    "description": "Description",
+    "abstract": "Abstract",
+    "publication": "Publication",
+    "format": "Format",
+    "callNumber": "Call Number",
+    "classification": "Classification",
+    "holding": "Holding",
+    "hasImage": "Image",
+    "noData": "No data available",
+    "prev": "Prev",
+    "next": "Next",
+    "backToSearch": "Back to Search",
+    "publicationYear": "Publication Year"
+  },
+  "Facet": {
+    "classification": "Classification",
+    "author": "Author",
+    "publicationYear": "Publication Year",
+    "hasImage": "Has Image"
+  },
+  "Breadcrumb": {
+    "home": "Home",
+    "ariaLabel": "Breadcrumb navigation"
+  },
+  "BackToTop": {
+    "backToTop": "Back to Top",
+    "backToPageTop": "Back to Page Top"
+  },
+  "HomePage": {
+    "title": "Home",
+    "startSearch": "Start Search"
+  },
+  "Search": {
+    "noResults": "No results found.",
+    "hasImage": "Has Image"
+  },
+  "NewsPage": {
+    "title": "News",
+    "noNews": "No news available."
+  },
+  "AboutPage": {
+    "title": "On the Morrison Pamphlets Database"
+  },
+  "FulltextSearchPage": {
+    "title": "Fulltext Search",
+    "description": "Search through OCR text of Morrison Pamphlets at page level. Enter a search term to find pages with highlighted matching text.",
+    "searchPlaceholder": "Enter fulltext search keyword...",
+    "bookTitle": "Title",
+    "page": "Page",
+    "viewInViewer": "View in Viewer",
+    "sortRelevance": "By Relevance",
+    "sortAppearance": "By Appearance"
+  }
+}

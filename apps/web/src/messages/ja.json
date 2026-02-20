@@ -1,0 +1,104 @@
+{
+  "Common": {
+    "title": "モリソンパンフレット統合データベース",
+    "search": "検索",
+    "home": "ホーム"
+  },
+  "Header": {
+    "search": "検索",
+    "fulltextSearch": "全文検索",
+    "about": "このデータベースについて",
+    "news": "お知らせ",
+    "openMenu": "メニューを開く",
+    "ja": "日本語",
+    "en": "English"
+  },
+  "SearchPage": {
+    "title": "検索",
+    "search": "検索",
+    "placeholder": "タイトル、著者名、キーワードを入力",
+    "results": "件",
+    "noResults": "検索結果はありません。",
+    "next": "次へ",
+    "previous": "前へ",
+    "searchPlaceholder": "検索...",
+    "showing": "表示中",
+    "of": "件中",
+    "items": "件",
+    "displaying": "を表示",
+    "noMatchFound": "に一致する結果は見つかりませんでした。",
+    "noResultsAvailable": "結果がありません。",
+    "searchKeyword": "検索キーワード：",
+    "display": "表示:",
+    "sortBy": "並び順:",
+    "byCount": "件数順",
+    "byName": "名前順",
+    "yes": "あり",
+    "no": "なし",
+    "itemsPerPage": "件ずつ表示",
+    "reset": "リセット",
+    "quotationStart": "「",
+    "quotationEnd": "」",
+    "searching": "検索中...",
+    "facetSearchPlaceholder": "絞り込み...",
+    "maxResultsNote": "（最大10,000件まで表示可能）"
+  },
+  "ItemPage": {
+    "loading": "読み込み中...",
+    "bibliographicInfo": "書誌情報",
+    "title": "タイトル",
+    "author": "著者",
+    "description": "内容",
+    "abstract": "要約",
+    "publication": "出版情報",
+    "format": "形態",
+    "callNumber": "請求記号",
+    "classification": "分類",
+    "holding": "所蔵",
+    "hasImage": "画像",
+    "noData": "該当データなし",
+    "prev": "前",
+    "next": "次",
+    "backToSearch": "検索に戻る",
+    "publicationYear": "出版年"
+  },
+  "Facet": {
+    "classification": "分類",
+    "author": "著者",
+    "publicationYear": "出版年",
+    "hasImage": "画像あり"
+  },
+  "Breadcrumb": {
+    "home": "ホーム",
+    "ariaLabel": "パンくずリスト"
+  },
+  "BackToTop": {
+    "backToTop": "トップへ戻る",
+    "backToPageTop": "ページトップへ戻る"
+  },
+  "HomePage": {
+    "title": "ホーム",
+    "startSearch": "検索を開始"
+  },
+  "Search": {
+    "noResults": "検索結果が見つかりませんでした。",
+    "hasImage": "画像あり"
+  },
+  "NewsPage": {
+    "title": "お知らせ",
+    "noNews": "お知らせはありません。"
+  },
+  "AboutPage": {
+    "title": "モリソンパンフレット・データベースによせて"
+  },
+  "FulltextSearchPage": {
+    "title": "全文検索",
+    "description": "モリソンパンフレットのOCRテキストをページ単位で全文検索します。検索語句を入力すると、該当するページのテキストがハイライト表示されます。",
+    "searchPlaceholder": "全文検索キーワードを入力...",
+    "bookTitle": "タイトル",
+    "page": "ページ",
+    "viewInViewer": "ビューアで表示",
+    "sortRelevance": "関連度順",
+    "sortAppearance": "出現順"
+  }
+}

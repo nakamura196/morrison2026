@@ -1,0 +1,11 @@
+{
+  "siteName": "Morrison Pamphlets Integrated Database",
+  "siteDescription": "Browse digitized images of the \"Morrison Pamphlets\" collected by G.E. Morrison. Please note that many pages may be unclear due to water damage to the original materials. Items are arranged based on the classified catalog published in 1972.",
+  "links": [
+    {
+      "url": "https://toyo-bunko.or.jp/",
+      "title": "東洋文庫",
+      "title_en": "Toyo Bunko"
+    }
+  ]
+}

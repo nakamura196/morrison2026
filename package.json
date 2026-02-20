@@ -1,0 +1,19 @@
+{
+  "name": "morrison-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@morrison/web",
+    "build": "npm run build --workspace=@morrison/web",
+    "start": "npm run start --workspace=@morrison/web",
+    "lint": "npm run lint --workspace=@morrison/web"
+  },
+  "overrides": {
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2"
+  }
+}

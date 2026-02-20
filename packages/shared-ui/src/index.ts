@@ -1,0 +1,30 @@
+// Search components
+export { default as SearchUI } from './components/search'
+export { default as SearchBox } from './components/search/SearchBox'
+export { default as Facets } from './components/search/Facets'
+export { default as Filters } from './components/search/Filters'
+export { default as Paging } from './components/search/Paging'
+export { default as PagingInfo } from './components/search/PagingInfo'
+export { default as ResultsPerPage } from './components/search/ResultsPerPage'
+export { default as NoResults } from './components/search/NoResults'
+export { default as ClearFilters } from './components/search/ClearFilters'
+export { default as SortBy } from './components/search/SortBy'
+export { default as Facet } from './components/search/Facet'
+
+// Search types
+export type { FacetOption, SearchUITranslations, ThemeColor } from './components/search/types'
+
+// Other components
+export { default as GoogleAnalytics } from './components/GoogleAnalytics'
+export { default as BackToTopButton } from './components/BackToTopButton'
+export type { BackToTopTranslations } from './components/BackToTopButton'
+export { default as Breadcrumb } from './components/Breadcrumb'
+export type { BreadcrumbItem, BreadcrumbTranslations } from './components/Breadcrumb'
+export { default as Jumbotron } from './components/Jumbotron'
+export type { JumbotronTranslations } from './components/Jumbotron'
+export { default as News } from './components/News'
+export type { NewsTranslations } from './components/News'
+export { default as Carousel } from './components/Carousel'
+export type { CarouselTranslations } from './components/Carousel'
+export { default as MiradorViewer } from './components/MiradorViewer'
+export type { MiradorViewerProps } from './components/MiradorViewer'
