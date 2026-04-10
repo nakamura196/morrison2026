@@ -24,11 +24,21 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 border-t border-gray-800 dark:border-gray-800">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Column 1: About & News */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Column 1: Site info */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
               {config.siteName}
+            </h3>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              {config.siteDescription}
+            </p>
+          </div>
+
+          {/* Column 2: About & News */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
+              {labels.about}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -50,7 +60,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 2: Search */}
+          {/* Column 3: Search */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
               {labels.search}
@@ -75,7 +85,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Related links */}
+          {/* Column 4: Related links */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
               {labels.relatedLinks}
