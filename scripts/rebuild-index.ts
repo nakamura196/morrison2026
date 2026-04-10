@@ -29,7 +29,7 @@ try {
 const ES_HOST = process.env.ES_HOST || ''
 const ES_USERNAME = process.env.ES_USERNAME || ''
 const ES_PASSWORD = process.env.ES_PASSWORD || ''
-const INDEX_NAME = 'morrison_bib'
+const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 const BULK_FILE = path.resolve(__dirname, '../data/morrison-bulk.ndjson')
 
 function createHeaders() {

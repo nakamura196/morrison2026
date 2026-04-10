@@ -280,7 +280,8 @@ export async function POST(
   const body = await request.json()
   const { index } = await params
   const host = process.env.ES_HOST || ''
-  const { state, queryConfig } = body
+  const state = body.state || body.requestState
+  const queryConfig = body.queryConfig
 
   // Validate index
   const allowedIndices = (process.env.ALLOWED_INDICES || 'morrison_bib').split(',').map(s => s.trim())

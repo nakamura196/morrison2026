@@ -29,6 +29,7 @@ try {
 const OMEKA_BASE_URL = process.env.OMEKA_BASE_URL || process.env.NEXT_PUBLIC_OMEKA_BASE_URL || ''
 const OMEKA_USER = process.env.OMEKA_USER || ''
 const OMEKA_PASSWORD = process.env.OMEKA_PASSWORD || ''
+const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 const PER_PAGE = 50
 const OUTPUT_DIR = path.resolve(__dirname, '../data')
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'morrison-bulk.ndjson')
@@ -177,7 +178,7 @@ async function main() {
         // Use callNumber as the document ID (unique per item)
         const id = transformed.callNumber || `morrison_${item['o:id']}`
 
-        writeStream.write(JSON.stringify({ index: { _index: 'morrison_bib', _id: id } }) + '\n')
+        writeStream.write(JSON.stringify({ index: { _index: INDEX_NAME, _id: id } }) + '\n')
         writeStream.write(JSON.stringify(transformed) + '\n')
         totalItems++
       }

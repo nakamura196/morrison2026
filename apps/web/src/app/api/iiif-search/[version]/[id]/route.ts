@@ -17,7 +17,7 @@ import {
 
 export const revalidate = 3600
 
-const OCR_INDEX = 'morrison'
+const OCR_INDEX = process.env.FULLTEXT_INDEX_NAME || 'morrison'
 const BIB_INDEX = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
 export async function GET(

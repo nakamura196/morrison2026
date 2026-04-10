@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { esSearch } from '@toyo/shared-lib'
 
-const INDEX_NAME = 'morrison'
+const INDEX_NAME = process.env.FULLTEXT_INDEX_NAME || 'morrison'
 const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
 interface SearchFilter {
