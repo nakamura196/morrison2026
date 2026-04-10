@@ -53,7 +53,8 @@ next-env.d.ts
 scripts/*.py
 
 # temp
-tmp
+tmp/
+scripts/tmp/
 out.zip
 Thumbs.db
 .env*.local
