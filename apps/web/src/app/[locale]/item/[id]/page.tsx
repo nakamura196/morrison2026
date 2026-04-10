@@ -119,7 +119,7 @@ export default async function ItemPage({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
 
   // IIIF manifest URL
-  const manifestUrl = `${siteUrl}/api/iiif/2/${id}/manifest`
+  const manifestUrl = `${siteUrl}/api/iiif/3/${id}/manifest`
   const hasImages = item.has_image
 
   return (

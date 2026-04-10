@@ -11,7 +11,7 @@ export default function ThemeToggle({ variant = "header" }: ThemeToggleProps) {
 
   const colorClass =
     variant === "header"
-      ? "text-white hover:text-blue-100"
+      ? "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
       : "text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400";
 
   return (

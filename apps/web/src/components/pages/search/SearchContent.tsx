@@ -244,14 +244,11 @@ export default function SearchContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-blue-600 dark:bg-blue-700 text-white py-8">
+      <div className="bg-gray-700 dark:bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
-            Morrison Pamphlets Database
+          <h1 className="text-2xl md:text-3xl font-bold text-center">
+            {translations.search || '検索'}
           </h1>
-          <p className="text-center text-blue-100 text-lg">
-            モリソンパンフレット統合データベース
-          </p>
         </div>
       </div>
 

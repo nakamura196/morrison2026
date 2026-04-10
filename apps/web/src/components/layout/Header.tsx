@@ -16,14 +16,14 @@ export default function Header() {
   const config = locale === 'en' ? configEn : configJa
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-blue-700 dark:bg-blue-800 border-b border-blue-800 dark:border-blue-900">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <nav className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
           >
-            <span className="text-xl sm:text-2xl font-bold text-white">
+            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {config.siteName}
             </span>
           </Link>
@@ -32,28 +32,28 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/search"
-              className="flex items-center space-x-1 text-white hover:text-blue-100 transition-colors"
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
             >
               <HiSearch className="w-5 h-5" />
               <span>{t('search')}</span>
             </Link>
             <Link
               href="/fulltext-search"
-              className="flex items-center space-x-1 text-white hover:text-blue-100 transition-colors"
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
             >
               <HiDocumentText className="w-5 h-5" />
               <span>{t('fulltextSearch')}</span>
             </Link>
             <Link
               href="/about"
-              className="flex items-center space-x-1 text-white hover:text-blue-100 transition-colors"
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
             >
               <HiInformationCircle className="w-5 h-5" />
               <span>{t('about')}</span>
             </Link>
             <Link
               href="/news"
-              className="flex items-center space-x-1 text-white hover:text-blue-100 transition-colors"
+              className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
             >
               <HiBell className="w-5 h-5" />
               <span>{t('news')}</span>
@@ -64,7 +64,7 @@ export default function Header() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-white hover:text-blue-100 transition-colors"
+                className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
               >
                 <span>{locale === 'en' ? link.title_en : link.title}</span>
                 <HiExternalLink className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function Header() {
           <div className="flex items-center space-x-4 md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg text-white hover:bg-blue-800 transition-colors"
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
             >
               <span className="sr-only">{t('openMenu')}</span>
               {isMenuOpen ? (

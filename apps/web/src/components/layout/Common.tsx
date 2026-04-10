@@ -48,9 +48,9 @@ export default async function Common({
                 {title}
               </h1>
               <div className="flex items-center justify-center space-x-2">
-                <div className="h-1 w-12 bg-blue-600/30 dark:bg-blue-500/30 rounded-full" />
-                <div className="h-1 w-20 bg-blue-600 dark:bg-blue-500 rounded-full" />
-                <div className="h-1 w-12 bg-blue-600/30 dark:bg-blue-500/30 rounded-full" />
+                <div className="h-1 w-12 bg-gray-400/30 dark:bg-gray-500/30 rounded-full" />
+                <div className="h-1 w-20 bg-gray-500 dark:bg-gray-400 rounded-full" />
+                <div className="h-1 w-12 bg-gray-400/30 dark:bg-gray-500/30 rounded-full" />
               </div>
             </div>
           )}

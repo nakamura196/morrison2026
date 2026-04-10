@@ -30,8 +30,8 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
 
   // Build Mirador viewer URL (ID is callNumber)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
-  const manifestUrl = `${siteUrl}/api/iiif/2/${callNumber}/manifest`
-  const canvasUrl = `${siteUrl}/api/iiif/2/${callNumber}/canvas/p${page}`
+  const manifestUrl = `${siteUrl}/api/iiif/3/${callNumber}/manifest`
+  const canvasUrl = `${siteUrl}/api/iiif/3/${callNumber}/canvas/p${page}`
   const viewerUrl = `/mirador?iiif-content=${encodeURIComponent(manifestUrl)}&canvas=${encodeURIComponent(canvasUrl)}&q=${encodeURIComponent(searchTerm)}`
 
   return (
