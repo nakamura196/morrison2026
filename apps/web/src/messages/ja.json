@@ -66,7 +66,9 @@
     "classification": "分類",
     "author": "著者",
     "publicationYear": "出版年",
-    "hasImage": "画像あり"
+    "hasImage": "画像あり",
+    "previous": "前へ",
+    "next": "次へ"
   },
   "Breadcrumb": {
     "home": "ホーム",
