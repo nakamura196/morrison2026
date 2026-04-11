@@ -57,7 +57,7 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
               {callNumber && (
                 <Link
                   href={`/item/${callNumber}`}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800"
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100 hover:bg-neutral-300 dark:hover:bg-neutral-600"
                 >
                   {callNumber}
                 </Link>
@@ -76,7 +76,7 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
             {hasImage && (
               <Link
                 href={viewerUrl}
-                className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="inline-flex items-center text-sm font-medium text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white"
               >
                 {t('viewInViewer')}
                 <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
           {/* Title */}
           {itemTitle && (
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              <Link href={`/item/${callNumber}`} className="hover:text-blue-600 dark:hover:text-blue-400">
+              <Link href={`/item/${callNumber}`} className="hover:text-black dark:hover:text-white">
                 {itemTitle}
               </Link>
               {author && (
@@ -102,7 +102,7 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
 
           {/* Text Snippet */}
           {textSnippet && (
-            <div className="p-2 bg-blue-50 dark:bg-blue-950 rounded-md border-l-4 border-blue-500">
+            <div className="p-2 bg-gray-50 dark:bg-gray-900/60 rounded-md border-l-4 border-neutral-500 dark:border-neutral-400">
               <p
                 className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: textSnippet }}

@@ -30,11 +30,11 @@ export default async function NewsPage({
                       <HiCalendar className="w-5 h-5 mr-2" />
                       <time dateTime={item.date}>{item.date}</time>
                     </div>
-                    <h3 className="text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-gray-900 dark:text-gray-100 group-hover:text-black dark:group-hover:text-white transition-colors">
                       {item.title}
                     </h3>
                   </div>
-                  <HiChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors shrink-0" />
+                  <HiChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors shrink-0" />
                 </div>
               </Link>
             ))}

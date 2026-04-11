@@ -29,7 +29,7 @@ export function FacetPagination({
           text-gray-700 dark:text-gray-300 disabled:opacity-50
           disabled:cursor-not-allowed hover:bg-gray-50
           dark:hover:bg-gray-700 transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400"
       >
         {t('previous')}
       </button>
@@ -45,13 +45,13 @@ export function FacetPagination({
               transition-all duration-200
               ${
                 page === currentPage
-                  ? 'bg-blue-500 text-white dark:bg-blue-600'
+                  ? 'bg-neutral-900 text-white dark:bg-neutral-700'
                   : page === '...'
                   ? 'text-gray-400 dark:text-gray-500 cursor-default'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
               }
               ${page !== '...' ? 'hover:shadow-sm dark:hover:shadow-gray-900/30' : ''}
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+              focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400
             `}
           >
             {page}
@@ -67,7 +67,7 @@ export function FacetPagination({
           text-gray-700 dark:text-gray-300 disabled:opacity-50
           disabled:cursor-not-allowed hover:bg-gray-50
           dark:hover:bg-gray-700 transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400"
       >
         {t('next')}
       </button>

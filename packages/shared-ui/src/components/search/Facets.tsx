@@ -28,14 +28,20 @@ const Facets = ({
 
   const buttonActiveColor = themeColor === 'amber'
     ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800'
+    : themeColor === 'neutral'
+    ? 'bg-neutral-100 dark:bg-neutral-800/60 text-neutral-900 dark:text-neutral-100 ring-1 ring-neutral-300 dark:ring-neutral-700'
     : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800';
 
   const chevronActiveColor = themeColor === 'amber'
     ? 'text-amber-500 dark:text-amber-400'
+    : themeColor === 'neutral'
+    ? 'text-neutral-700 dark:text-neutral-300'
     : 'text-blue-500 dark:text-blue-400';
 
   const focusColor = themeColor === 'amber'
     ? 'focus:ring-amber-500 dark:focus:ring-amber-400'
+    : themeColor === 'neutral'
+    ? 'focus:ring-neutral-500 dark:focus:ring-neutral-400'
     : 'focus:ring-blue-500 dark:focus:ring-blue-400';
 
   return (

@@ -33,10 +33,10 @@ const CustomView = ({
         dark:hover:border-gray-600
         focus:outline-none
         focus:ring-2
-        focus:ring-blue-500/20
-        dark:focus:ring-blue-400/20
-        focus:border-blue-500
-        dark:focus:border-blue-400
+        focus:ring-neutral-500/20
+        dark:focus:ring-neutral-400/20
+        focus:border-neutral-500
+        dark:focus:border-neutral-400
         cursor-pointer
         transition-all
         duration-200

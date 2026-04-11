@@ -10,7 +10,7 @@ export interface NewsTranslations {
   errorLoading: string
 }
 
-export type ThemeColor = 'amber' | 'blue'
+export type ThemeColor = 'amber' | 'blue' | 'neutral'
 
 interface LinkProps {
   href: string
@@ -53,10 +53,14 @@ export default function News({
 
   const hoverColor = themeColor === 'amber'
     ? 'group-hover:text-amber-600 dark:group-hover:text-amber-400'
+    : themeColor === 'neutral'
+    ? 'group-hover:text-neutral-900 dark:group-hover:text-white'
     : 'group-hover:text-blue-600 dark:group-hover:text-blue-400'
 
   const iconHoverColor = themeColor === 'amber'
     ? 'group-hover:text-amber-500 dark:group-hover:text-amber-400'
+    : themeColor === 'neutral'
+    ? 'group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
     : 'group-hover:text-blue-500 dark:group-hover:text-blue-400'
 
   useEffect(() => {

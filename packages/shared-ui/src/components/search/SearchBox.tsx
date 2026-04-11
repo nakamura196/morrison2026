@@ -28,14 +28,20 @@ const CustomSearchBoxView = ({
 }) => {
   const buttonColor = themeColor === 'amber'
     ? 'bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700 focus:ring-amber-500'
+    : themeColor === 'neutral'
+    ? 'bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 focus:ring-neutral-500'
     : 'bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-500';
 
   const focusColor = themeColor === 'amber'
     ? 'hover:border-amber-500/50 dark:hover:border-amber-400/50 focus:ring-amber-500/20 dark:focus:ring-amber-400/20 focus:border-amber-500 dark:focus:border-amber-400'
+    : themeColor === 'neutral'
+    ? 'hover:border-neutral-500/50 dark:hover:border-neutral-400/50 focus:ring-neutral-500/20 dark:focus:ring-neutral-400/20 focus:border-neutral-500 dark:focus:border-neutral-400'
     : 'hover:border-blue-500/50 dark:hover:border-blue-400/50 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 focus:border-blue-500 dark:focus:border-blue-400';
 
   const iconHoverColor = themeColor === 'amber'
     ? 'group-hover:text-amber-500 dark:group-hover:text-amber-400'
+    : themeColor === 'neutral'
+    ? 'group-hover:text-neutral-700 dark:group-hover:text-neutral-300'
     : 'group-hover:text-blue-500 dark:group-hover:text-blue-400';
 
   return (

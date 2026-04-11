@@ -15,6 +15,8 @@ export default function CustomPaging({
 }) {
   const activeColor = themeColor === 'amber'
     ? 'bg-amber-600 text-white'
+    : themeColor === 'neutral'
+    ? 'bg-neutral-900 dark:bg-neutral-700 text-white'
     : 'bg-blue-600 text-white';
 
   return (

@@ -116,7 +116,7 @@ export default function Footer() {
               href="http://www.toyo-bunko.or.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-blue-400"
+              className="hover:text-white"
             >
               {labels.copyright}
             </a>

@@ -9,7 +9,7 @@ export interface BackToTopTranslations {
 
 interface BackToTopButtonProps {
   t: BackToTopTranslations
-  themeColor?: 'amber' | 'blue'
+  themeColor?: 'amber' | 'blue' | 'neutral'
 }
 
 export default function BackToTopButton({ t, themeColor = 'amber' }: BackToTopButtonProps) {
@@ -37,6 +37,8 @@ export default function BackToTopButton({ t, themeColor = 'amber' }: BackToTopBu
 
   const bgColor = themeColor === 'amber'
     ? 'bg-amber-600 hover:bg-amber-700'
+    : themeColor === 'neutral'
+    ? 'bg-neutral-900 hover:bg-neutral-800 dark:bg-neutral-800 dark:hover:bg-neutral-700'
     : 'bg-blue-600 hover:bg-blue-700'
 
   if (!isVisible) return null

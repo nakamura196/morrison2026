@@ -17,6 +17,8 @@ function ClearFiltersView({
 }) {
   const colorClasses = themeColor === 'amber'
     ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/40'
+    : themeColor === 'neutral'
+    ? 'text-neutral-900 dark:text-neutral-100 bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-600/60'
     : 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/40'
 
   if (!clearFilters || filters.length === 0) {

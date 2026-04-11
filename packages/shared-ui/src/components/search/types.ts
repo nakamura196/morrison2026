@@ -42,4 +42,4 @@ export interface SearchUITranslations {
   searchPlaceholder: string
 }
 
-export type ThemeColor = 'amber' | 'blue'
+export type ThemeColor = 'amber' | 'blue' | 'neutral'

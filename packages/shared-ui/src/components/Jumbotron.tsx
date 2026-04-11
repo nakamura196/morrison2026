@@ -6,7 +6,7 @@ export interface JumbotronTranslations {
   startSearch: string
 }
 
-export type ThemeColor = 'amber' | 'blue'
+export type ThemeColor = 'amber' | 'blue' | 'neutral'
 
 interface LinkProps {
   href: string
@@ -35,6 +35,8 @@ export default function Jumbotron({
 }: JumbotronProps) {
   const buttonColor = themeColor === 'amber'
     ? 'bg-amber-600 hover:bg-amber-700'
+    : themeColor === 'neutral'
+    ? 'bg-neutral-900 hover:bg-neutral-800'
     : 'bg-blue-600 hover:bg-blue-700'
 
   return (

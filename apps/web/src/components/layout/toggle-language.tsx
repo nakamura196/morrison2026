@@ -17,8 +17,8 @@ export const ToggleLanguage = ({ variant = 'header' }: ToggleLanguageProps) => {
 
   const colorClass =
     variant === 'header'
-      ? 'text-white hover:text-blue-100'
-      : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400';
+      ? 'text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white'
+      : 'text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white';
 
   const getPath = (loc: string) => {
     const p = (pathname || '').replace(`/${locale}`, '');

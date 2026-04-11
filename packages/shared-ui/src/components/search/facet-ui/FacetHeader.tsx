@@ -97,7 +97,7 @@ export function FacetHeader({
               relative flex items-center overflow-hidden rounded-lg w-full
               border ${
                 isFocused
-                  ? 'border-blue-500 ring-1 ring-blue-500/20 dark:border-blue-400 dark:ring-blue-400/20'
+                  ? 'border-neutral-500 ring-1 ring-neutral-500/20 dark:border-neutral-400 dark:ring-neutral-400/20'
                   : 'border-gray-200 dark:border-gray-600'
               }
               transition-all duration-200
@@ -141,7 +141,7 @@ export function FacetHeader({
             <select
               className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600
                 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm min-w-[80px]
-                focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400
                 focus:border-transparent transition-all duration-200"
               value={displayCount}
               onChange={(e) => onDisplayCountChange(Number(e.target.value))}
@@ -162,7 +162,7 @@ export function FacetHeader({
           <select
             className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600
               bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm min-w-[90px]
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+              focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400
               focus:border-transparent transition-all duration-200"
             value={sortType}
             onChange={(e) => onSortTypeChange(e.target.value as SortType)}
@@ -176,10 +176,10 @@ export function FacetHeader({
         {showSearchButton && (
           <button
             onClick={onSearch}
-            className="px-4 py-2 rounded-lg border border-blue-500 dark:border-blue-400
-              bg-blue-500 dark:bg-blue-600 text-white text-sm min-w-[90px]
-              hover:bg-blue-600 dark:hover:bg-blue-700
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+            className="px-4 py-2 rounded-lg border border-neutral-900 dark:border-neutral-700
+              bg-neutral-900 dark:bg-neutral-800 text-white text-sm min-w-[90px]
+              hover:bg-neutral-800 dark:hover:bg-neutral-700
+              focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400
               focus:ring-offset-2 dark:focus:ring-offset-gray-800
               transition-all duration-200
               flex items-center justify-center gap-2 shadow-sm"

@@ -70,8 +70,8 @@ export function FacetOptionList({
                   : onCustomSelect(value)
               }
               className="w-4 h-4 rounded border-gray-300 dark:border-gray-600
-                text-blue-500 dark:text-blue-400 focus:ring-blue-500
-                dark:focus:ring-blue-400 dark:ring-offset-gray-800
+                text-neutral-900 dark:text-neutral-200 focus:ring-neutral-500
+                dark:focus:ring-neutral-400 dark:ring-offset-gray-800
                 bg-white dark:bg-gray-700
                 transition-all duration-200"
               value={String(option.value)}

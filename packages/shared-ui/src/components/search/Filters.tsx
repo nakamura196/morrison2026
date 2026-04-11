@@ -27,6 +27,12 @@ export default function Filters({
         label: 'text-amber-600 dark:text-amber-400',
         icon: 'text-amber-500 dark:text-amber-400',
       }
+    : themeColor === 'neutral'
+    ? {
+        badge: 'bg-neutral-100 dark:bg-neutral-800/60 text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700/60 focus:ring-neutral-500/20 dark:focus:ring-neutral-400/20',
+        label: 'text-neutral-700 dark:text-neutral-300',
+        icon: 'text-neutral-600 dark:text-neutral-400',
+      }
     : {
         badge: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 focus:ring-blue-500/20 dark:focus:ring-blue-400/20',
         label: 'text-blue-600 dark:text-blue-400',
