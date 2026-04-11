@@ -1,3 +1,5 @@
+import { highlightFields } from '@/config/search'
+
 type Filter = {
   field: string
   values: (number | string | boolean)[]
@@ -181,13 +183,10 @@ async function directSearch(host: string, index: string, state: State, queryConf
   esQuery.highlight = {
     pre_tags: ['<mark>'],
     post_tags: ['</mark>'],
-    fields: {
-      title: {},
-      description: {},
-      abstract: {},
-      heading1: {},
-      publication: {},
-    },
+    fields: highlightFields.reduce((acc, field) => {
+      acc[field] = {}
+      return acc
+    }, {} as Record<string, object>),
   }
 
   // Make ES request

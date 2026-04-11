@@ -23,3 +23,16 @@
   font-style: normal;
   background-color: #ff0;
 }
+
+.search-results mark {
+  background-color: #fef08a;
+  color: inherit;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.dark .search-results mark {
+  background-color: #854d0e;
+  color: #fef3c7;
+}

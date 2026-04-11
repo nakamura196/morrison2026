@@ -37,6 +37,7 @@ const OUTPUT_FILE = path.join(OUTPUT_DIR, 'morrison-bulk.ndjson')
 interface OmekaPropertyValue {
   '@value'?: string
   '@id'?: string
+  '@language'?: string
   type?: string
 }
 
@@ -51,16 +52,42 @@ interface OmekaItem {
   [key: string]: unknown
 }
 
+function unescapeString(str: string): string {
+  // Remove backslash escaping from Omeka S API responses
+  // e.g., "Abu Taleb\'s" → "Abu Taleb's"
+  return str.replace(/\\'/g, "'").replace(/\\"/g, '"')
+}
+
 function getPropertyValue(item: OmekaItem, property: string, index = 0): string {
   const values = item[property] as OmekaPropertyValue[] | undefined
   if (!values || !values[index]) return ''
-  return values[index]['@value'] || ''
+  return unescapeString(values[index]['@value'] || '')
 }
 
 function getAllPropertyValues(item: OmekaItem, property: string): string[] {
   const values = item[property] as OmekaPropertyValue[] | undefined
   if (!values) return []
-  return values.map(v => v['@value'] || '').filter(Boolean)
+  return values.map(v => unescapeString(v['@value'] || '')).filter(Boolean)
+}
+
+function getLanguages(item: OmekaItem, property: string): string[] {
+  const values = item[property] as OmekaPropertyValue[] | undefined
+  if (!values) return []
+
+  const languages = values
+    .map(v => v['@language'] || 'en') // Default to 'en' if no language specified
+    .filter((lang, index, self) => self.indexOf(lang) === index) // Remove duplicates
+
+  return languages.sort() // Sort for consistency: ['en', 'ja']
+}
+
+function getPropertyValueByLanguage(item: OmekaItem, property: string, language: string): string {
+  const values = item[property] as OmekaPropertyValue[] | undefined
+  if (!values) return ''
+
+  // Find value with matching language
+  const value = values.find(v => (v['@language'] || 'en') === language)
+  return value ? unescapeString(value['@value'] || '') : ''
 }
 
 function extractYear(text: string): string {
@@ -74,51 +101,78 @@ function extractYear(text: string): string {
  *   dcterms:description → description (multiple values possible)
  *   dcterms:abstract    → abstract (multiple values: EN, JA)
  *   dcterms:type        → "あり" = has_image
- *   dcterms:date        → date (sometimes present)
+ *   dcterms:date        → date
+ *   dcterms:publisher   → publisher
+ *   dcterms:isPartOf    → isPartOf
  *   dcndl:callNumber    → callNumber
  *   ex:heading1         → heading1 (author)
+ *   ex:title            → titleStatement (タイトル責任表示)
  *   ex:format           → format
  *   ex:holding          → holding
  *   ex:publication      → publication
  *   ex:tag1             → tag1 (classification)
  *   ex:tag2, ex:tag3    → tag2, tag3 (sub-classifications)
+ *   ex:references       → references (引用元)
  *   toyo:callNumber_converted → callNumber_converted
  *   toyo:tag1_numbered  → tag1_numbered
  */
 function transformItem(item: OmekaItem) {
   const title = getPropertyValue(item, 'dcterms:title')
   const descriptions = getAllPropertyValues(item, 'dcterms:description')
-  const abstracts = getAllPropertyValues(item, 'dcterms:abstract')
   const heading1 = getPropertyValue(item, 'ex:heading1')
   const publication = getPropertyValue(item, 'ex:publication')
   const date = getPropertyValue(item, 'dcterms:date')
+  const publisher = getPropertyValue(item, 'dcterms:publisher')
+  const isPartOf = getPropertyValue(item, 'dcterms:isPartOf')
   const format = getPropertyValue(item, 'ex:format')
   const callNumber = getPropertyValue(item, 'dcndl:callNumber')
   const callNumberConverted = getPropertyValue(item, 'toyo:callNumber_converted')
+  const titleStatement = getPropertyValue(item, 'ex:title')
   const tag1 = getPropertyValue(item, 'ex:tag1')
   const tag1Numbered = getPropertyValue(item, 'toyo:tag1_numbered')
+  const tag2 = getPropertyValue(item, 'ex:tag2')
+  const tag3 = getPropertyValue(item, 'ex:tag3')
   const holding = getPropertyValue(item, 'ex:holding')
+  const references = getPropertyValue(item, 'ex:references')
   const typeValue = getPropertyValue(item, 'dcterms:type')
 
   const hasImage = typeValue === 'あり'
   const publicationYear = extractYear(date) || extractYear(publication)
 
+  // Extract abstracts by language
+  const abstract_en = getPropertyValueByLanguage(item, 'dcterms:abstract', 'en')
+  const abstract_ja = getPropertyValueByLanguage(item, 'dcterms:abstract', 'ja')
+
+  // Extract languages from abstract (or description if abstract is empty)
+  const languages = getLanguages(item, 'dcterms:abstract').length > 0
+    ? getLanguages(item, 'dcterms:abstract')
+    : getLanguages(item, 'dcterms:description')
+
   const thumbnails = item.thumbnail_display_urls || {}
 
   return {
     title,
+    titleStatement,
     description: descriptions.join('\n'),
-    abstract: abstracts.join('\n'),
+    abstract_en,
+    abstract_ja,
     heading1,
     publication,
+    publisher,
+    date,
+    isPartOf,
     format,
     callNumber,
     callNumber_converted: callNumberConverted || callNumber.replace(/[-\s]/g, ''),
     tag1,
     tag1_numbered: tag1Numbered || tag1,
+    tag2,
+    tag3,
     holding: holding === '（記録なし）' ? '' : holding,
+    references,
     has_image: hasImage,
     publication_year: publicationYear,
+    language: languages,
     thumbnail_urls: {
       small: thumbnails.square || '',
       medium: thumbnails.medium || '',

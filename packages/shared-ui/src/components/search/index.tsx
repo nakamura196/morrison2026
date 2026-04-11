@@ -27,6 +27,7 @@ const SearchUI = ({
   children: {
     results: React.ReactNode;
     searchForm?: React.ReactNode;
+    customControls?: React.ReactNode;
   };
   t: SearchUITranslations;
   themeColor?: ThemeColor;
@@ -97,6 +98,11 @@ const SearchUI = ({
             </div>
           </div>
         </div>
+
+        {/* カスタムコントロール */}
+        {children.customControls && (
+          <div className="w-full">{children.customControls}</div>
+        )}
 
         {/* 検索結果 */}
         <div className="w-full">{children.results}</div>

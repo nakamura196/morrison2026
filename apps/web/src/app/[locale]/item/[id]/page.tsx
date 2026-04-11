@@ -1,15 +1,17 @@
 import Common from '@/components/layout/Common'
 import { config } from '@/config'
+import { getConfig } from '@/libs/getConfig'
 import { Metadata } from 'next'
 import { cache } from 'react'
 import { getDefaultMetadata } from '@/libs/metadata'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { createHeaders } from '@/libs/api'
 import { Link } from '@/i18n/routing'
 import type { MorrisonItem } from '@/types/morrison'
 import ItemViewer from '@/components/pages/item/ItemViewer'
+import ItemShareExport from '@/components/pages/item/ItemShareExport'
 
-const getData = cache(async (id: string): Promise<MorrisonItem | null> => {
+const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
   const host = process.env.ES_HOST || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
@@ -20,20 +22,42 @@ const getData = cache(async (id: string): Promise<MorrisonItem | null> => {
     })
 
     if (!response.ok) {
-      return null
+      return { item: null, raw: null }
     }
 
     const data = await response.json()
     if (!data.found) {
-      return null
+      return { item: null, raw: null }
     }
 
     return {
-      id: data._id,
-      ...data._source,
+      item: {
+        id: data._id,
+        ...data._source,
+      },
+      raw: data._source,
     }
   } catch (error) {
     console.error('Failed to fetch item:', error)
+    return { item: null, raw: null }
+  }
+})
+
+const getIndexLastUpdated = cache(async (): Promise<number | null> => {
+  const host = process.env.ES_HOST || ''
+  const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+
+  try {
+    const response = await fetch(`${host}/${index}/_settings`, {
+      method: 'GET',
+      headers: createHeaders(),
+    })
+    if (!response.ok) return null
+    const data = await response.json()
+    const raw = data?.[index]?.settings?.index?.creation_date
+    if (!raw) return null
+    return Number(raw)
+  } catch {
     return null
   }
 })
@@ -44,7 +68,7 @@ export const generateMetadata = async ({
   params: Promise<{ locale: string; id: string }>
 }): Promise<Metadata> => {
   const { locale, id } = await params
-  const item = await getData(id)
+  const { item } = await getData(id)
 
   if (!item) {
     return {
@@ -78,10 +102,15 @@ export default async function ItemPage({
 }) {
   const { id } = await params
   const resolvedSearchParams = await searchParams
+  const locale = await getLocale()
   const tCommon = await getTranslations('Common')
   const t = await getTranslations('ItemPage')
 
-  const item = await getData(id)
+  const [{ item, raw }, lastUpdatedMs, localeConfig] = await Promise.all([
+    getData(id),
+    getIndexLastUpdated(),
+    getConfig(locale),
+  ])
 
   if (!item) {
     return (
@@ -122,6 +151,26 @@ export default async function ItemPage({
   const manifestUrl = `${siteUrl}/api/iiif/3/${id}/manifest`
   const hasImages = item.has_image
 
+  const pageUrl = `${siteUrl}/${locale}/item/${id}`
+  const dateFormatter = new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  const today = dateFormatter.format(new Date())
+  const lastUpdatedText = lastUpdatedMs ? dateFormatter.format(new Date(lastUpdatedMs)) : null
+
+  const citationParts = [
+    item.heading1,
+    item.title ? `"${item.title}"` : null,
+    item.publication,
+    item.publisher,
+    item.callNumber ? `${t('callNumber')}: ${item.callNumber}` : null,
+    localeConfig.siteName,
+    `${pageUrl} (${t('accessed')} ${today})`,
+  ].filter(Boolean)
+  const citation = citationParts.join('. ') + '.'
+
   return (
     <div>
       <Common title={title} breadcrumbs={breadcrumbs}>
@@ -144,9 +193,33 @@ export default async function ItemPage({
           </div>
         )}
 
+        <ItemShareExport
+          itemId={id}
+          title={title}
+          pageUrl={pageUrl}
+          manifestUrl={manifestUrl}
+          hasImages={!!hasImages}
+          itemJson={raw ?? {}}
+          citation={citation}
+          labels={{
+            heading: t('shareExportHeading'),
+            exportGroup: t('exportGroup'),
+            shareGroup: t('shareGroup'),
+            citationGroup: t('citationGroup'),
+            jsonExport: t('jsonExport'),
+            iiifManifest: t('iiifManifest'),
+            copyLink: t('copyLink'),
+            copyCitation: t('copyCitation'),
+            copied: t('copied'),
+            shareOnX: t('shareOnX'),
+            shareOnFacebook: t('shareOnFacebook'),
+            shareOnLine: t('shareOnLine'),
+          }}
+        />
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-bold text-blue-800 dark:text-blue-200">
+          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               {t('bibliographicInfo')}
             </h2>
           </div>
@@ -160,6 +233,18 @@ export default async function ItemPage({
                 </dt>
                 <dd className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {item.title}
+                </dd>
+              </div>
+            )}
+
+            {/* Title Statement */}
+            {item.titleStatement && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('titleStatement')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.titleStatement}
                 </dd>
               </div>
             )}
@@ -188,14 +273,38 @@ export default async function ItemPage({
               </div>
             )}
 
-            {/* Abstract */}
-            {item.abstract && (
+            {/* Abstract (English) */}
+            {item.abstract_en && (
               <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('abstract')}
+                  {t('abstractEn')}
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.abstract}
+                  {item.abstract_en}
+                </dd>
+              </div>
+            )}
+
+            {/* Abstract (Japanese) */}
+            {item.abstract_ja && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('abstractJa')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.abstract_ja}
+                </dd>
+              </div>
+            )}
+
+            {/* Language */}
+            {item.language && item.language.length > 0 && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('language')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.language.map(lang => lang.toUpperCase()).join(', ')}
                 </dd>
               </div>
             )}
@@ -208,6 +317,30 @@ export default async function ItemPage({
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {item.publication}
+                </dd>
+              </div>
+            )}
+
+            {/* Publisher */}
+            {item.publisher && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('publisher')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.publisher}
+                </dd>
+              </div>
+            )}
+
+            {/* Date */}
+            {item.date && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('date')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.date}
                 </dd>
               </div>
             )}
@@ -260,6 +393,18 @@ export default async function ItemPage({
               </div>
             )}
 
+            {/* Sub-Classification */}
+            {(item.tag2 || item.tag3) && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('subClassification')}
+                </dt>
+                <dd className="mt-1 text-sm text-green-600 dark:text-green-400 sm:col-span-3 sm:mt-0">
+                  {[item.tag2, item.tag3].filter(Boolean).join(' > ')}
+                </dd>
+              </div>
+            )}
+
             {/* Holding */}
             {item.holding && (
               <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
@@ -271,35 +416,67 @@ export default async function ItemPage({
                 </dd>
               </div>
             )}
+
+            {/* Is Part Of */}
+            {item.isPartOf && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('isPartOf')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.isPartOf.startsWith('http') ? (
+                    <a
+                      href={item.isPartOf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                    >
+                      {item.isPartOf}
+                    </a>
+                  ) : (
+                    item.isPartOf
+                  )}
+                </dd>
+              </div>
+            )}
+
+            {/* References */}
+            {item.references && (
+              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {t('references')}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
+                  {item.references.startsWith('http') ? (
+                    <a
+                      href={item.references}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                    >
+                      {item.references}
+                    </a>
+                  ) : (
+                    item.references
+                  )}
+                </dd>
+              </div>
+            )}
           </dl>
         </div>
 
-        {/* Links section */}
-        <div className="mt-6 flex flex-wrap justify-center gap-4">
-          {/* IIIF Manifest link */}
-          {hasImages && (
-            <a
-              href={manifestUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 border border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-            >
-              <img
-                src="https://iiif.io/assets/images/logos/logo-sm.png"
-                alt="IIIF"
-                className="w-5 h-5 mr-2"
-              />
-              IIIF Manifest
-            </a>
-          )}
-
-        </div>
+        {/* Last updated */}
+        {lastUpdatedText && (
+          <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+            {t('lastUpdated')}: {lastUpdatedText}
+          </div>
+        )}
 
         {/* Back to search */}
         <div className="mt-6 text-center">
           <Link
             href={searchHref}
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            className="inline-flex items-center text-sm text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white"
           >
             <svg className="mr-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
