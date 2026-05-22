@@ -10,8 +10,10 @@ import { Link } from '@/i18n/routing'
 import type { MorrisonItem } from '@/types/morrison'
 import ItemViewer from '@/components/pages/item/ItemViewer'
 import ItemShareExport from '@/components/pages/item/ItemShareExport'
+import { ensureEnv } from '@/libs/cf-env'
 
 const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
+  ensureEnv()
   const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
@@ -44,6 +46,7 @@ const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; r
 })
 
 const getIndexLastUpdated = cache(async (): Promise<number | null> => {
+  ensureEnv()
   const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 

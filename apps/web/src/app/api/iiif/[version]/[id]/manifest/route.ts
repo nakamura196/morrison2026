@@ -15,6 +15,7 @@ import {
   createIIIFHeaders,
   type IIIFCanvasImage,
 } from '@toyo/shared-lib'
+import { ensureEnv } from '@/libs/cf-env'
 
 export const revalidate = 3600
 
@@ -77,6 +78,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ version: string; id: string }> },
 ) {
+  ensureEnv()
   const { version, id } = await params
   const host = getHost(request)
   const prefix = `${host}/api/iiif/${version}/${id}`

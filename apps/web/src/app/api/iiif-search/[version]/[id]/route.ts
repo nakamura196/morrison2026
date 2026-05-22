@@ -14,6 +14,7 @@ import {
   buildAnnotationList,
   type IIIFAnnotation,
 } from '@toyo/shared-lib'
+import { ensureEnv } from '@/libs/cf-env'
 
 export const revalidate = 3600
 
@@ -24,6 +25,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; version: string }> },
 ) {
+  ensureEnv()
   const { id, version } = await params
   const host = getHost(request)
   const prefix = `${host}/api/iiif-search/${version}/${id}`
