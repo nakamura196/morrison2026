@@ -482,10 +482,7 @@ export default function SearchContent() {
           connector={connector}
           t={translations}
           themeColor="amber"
-          initialState={{
-            sortField: 'callNumber',
-            sortDirection: 'asc',
-          }}
+          sortField="callNumber"
         >
           {{
             searchForm: <SearchBox t={translations} themeColor="amber" showSearchButton />,
