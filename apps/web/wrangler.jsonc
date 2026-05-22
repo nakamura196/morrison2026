@@ -7,7 +7,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "routes": [{ "pattern": "morrison.toyobunko-lab.jp", "custom_domain": true }],
+  // Custom domain (morrison.toyobunko-lab.jp) is bound out-of-band, not here,
+  // because the CI deploy token only has Workers Scripts (no Zone DNS/Routes).
+  // See scripts/setup/register-cloudflare-secrets.zsh / domain setup notes.
   "vars": {
     "ES_URL": "https://toyo-es.ldas.jp",
     "ALLOWED_INDICES": "morrison_bib",
