@@ -7,7 +7,7 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'as-needed',
 });
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return intlMiddleware(request as any);
 }
