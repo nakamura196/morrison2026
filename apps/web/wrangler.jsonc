@@ -7,6 +7,7 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "routes": [{ "pattern": "morrison.toyobunko-lab.jp", "custom_domain": true }],
   "vars": {
     "ES_URL": "https://toyo-es.ldas.jp",
     "ALLOWED_INDICES": "morrison_bib",
