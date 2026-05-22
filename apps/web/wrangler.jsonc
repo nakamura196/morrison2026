@@ -1,0 +1,19 @@
+{
+  "name": "morrison",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "ES_URL": "https://toyo-es.ldas.jp",
+    "ALLOWED_INDICES": "morrison_bib",
+    "NEXT_PUBLIC_INDEX_NAME": "morrison_bib",
+    "FULLTEXT_INDEX_NAME": "morrison"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

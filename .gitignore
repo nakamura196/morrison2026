@@ -15,6 +15,10 @@ node_modules/
 .next/
 out/
 
+# cloudflare / opennext
+.open-next/
+.wrangler/
+
 # production
 /build
 
@@ -49,8 +53,9 @@ next-env.d.ts
 .vscode/
 .idea/
 
-# scripts with credentials
+# scripts with credentials (直下 + ネストした migration スクリプトも対象)
 scripts/*.py
+scripts/**/*.py
 
 # temp
 tmp/
