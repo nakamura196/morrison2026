@@ -71,6 +71,13 @@ const indexMapping = {
       language: { type: 'keyword' },
       thumbnail_urls: { type: 'object', enabled: false },
       omeka_id: { type: 'integer' },
+      // NER 由来の固有表現ファセット (scripts/ner/build_es_entity_bulk.py で投入)。
+      // 注: rebuild は Omeka ndjson からなので ne_* は空で再作成される →
+      //     rebuild 後は scripts/setup/run-es-entities.zsh を再実行して再投入する。
+      ne_persName: { type: 'keyword' },
+      ne_placeName: { type: 'keyword' },
+      ne_orgName: { type: 'keyword' },
+      ne_date: { type: 'keyword' },
     },
   },
 }
