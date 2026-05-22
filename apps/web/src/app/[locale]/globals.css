@@ -3,19 +3,156 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @plugin "@tailwindcss/typography";
 
+/* =============================================================================
+ * Toyo Bunko design tokens
+ * Canonical source: @toyo/design-system/theme.css (../../toyo-ui)
+ * Phase 1: inlined here while the design-system package is not yet wired as a
+ * dependency. Keep in sync with toyo-ui/src/theme.css. Phase 2: replace this
+ * @theme block with `@import '@toyo/design-system/theme.css';`.
+ * ============================================================================= */
+@theme {
+  /* 臙脂 (enji) brand ramp — anchored on official #76161b */
+  --color-enji-50: #fbf2f2;
+  --color-enji-100: #f6e0e1;
+  --color-enji-200: #ecc1c3;
+  --color-enji-300: #db9598;
+  --color-enji-400: #c5666b;
+  --color-enji-500: #a83f45;
+  --color-enji-600: #8c2a2f;
+  --color-enji-700: #76161b;
+  --color-enji-800: #5f1216;
+  --color-enji-900: #4c1013;
+  --color-enji-950: #2d090b;
+
+  /* Semantic colors (dark overrides in @layer base) */
+  --color-brand: var(--color-enji-700);
+  --color-brand-strong: var(--color-enji-800);
+  --color-brand-soft: var(--color-enji-50);
+
+  --color-surface: #f5f0ed;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #ece4dd;
+
+  --color-ink: #1a1714;
+  --color-ink-muted: #5a5a5a;
+  --color-ink-subtle: #8a857c;
+
+  --color-line: #e0d8cf;
+
+  /* Category accents (official taxonomy; badges use white text — see ACCESSIBILITY.md) */
+  --color-museum: #573b21; /* 茶 — white 10.2:1 */
+  --color-library: #1e3c69; /* 紺 — white 11.0:1 */
+  --color-research: #827826; /* 古色 — white 4.50:1, AA min → badge text bold */
+  --color-academia: #1b6b63; /* 緑青 — white 6.3:1 */
+
+  /* Typography — vars come from next/font (layout.tsx) */
+  --font-sans: var(--font-biz-gothic), "BIZ UDPGothic", "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans", Meiryo, sans-serif;
+  --font-serif: var(--font-biz-mincho), "BIZ UDPMincho", "Hiragino Mincho ProN",
+    "Yu Mincho", "游明朝", serif;
+  --font-display: var(--font-eb-garamond), "EB Garamond", "BIZ UDPMincho", serif;
+
+  /* Phase 1 bridge: existing shared-ui components use amber-* utilities.
+     Remap the amber ramp to the enji ramp so they render in brand color without
+     a component refactor. Remove once components move to brand/* utilities. */
+  --color-amber-50: var(--color-enji-50);
+  --color-amber-100: var(--color-enji-100);
+  --color-amber-200: var(--color-enji-200);
+  --color-amber-300: var(--color-enji-300);
+  --color-amber-400: var(--color-enji-400);
+  --color-amber-500: var(--color-enji-500);
+  --color-amber-600: var(--color-enji-600);
+  --color-amber-700: var(--color-enji-700);
+  --color-amber-800: var(--color-enji-800);
+  --color-amber-900: var(--color-enji-900);
+  --color-amber-950: var(--color-enji-950);
+}
+
 @layer base {
-  :root {
-    font-family: var(--font-noto-sans), var(--font-noto-sans-jp), sans-serif;
-    --header-height: 72px;
+  .dark {
+    --color-brand: var(--color-enji-300);
+    --color-brand-strong: var(--color-enji-200);
+    --color-brand-soft: var(--color-enji-950);
+
+    --color-surface: #1c1a18;
+    --color-surface-raised: #26231f;
+    --color-surface-sunken: #15130f;
+
+    --color-ink: #ece6df;
+    --color-ink-muted: #b7b0a6;
+    --color-ink-subtle: #8f8a82;
+
+    --color-line: #3a342d;
   }
 
-  :root:lang(ja) {
-    font-family: var(--font-noto-sans-jp), var(--font-noto-sans), sans-serif;
+  :root {
+    --header-height: 72px;
   }
 
   html {
     scroll-padding-top: calc(var(--header-height) + 16px);
   }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  /* Headings in Mincho to carry the Toyo Bunko identity (see DESIGN_SYSTEM.md §3) */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+  }
+
+  /* === Accessibility (mirror of @toyo/design-system/a11y.css) =============== */
+  /* Visible keyboard focus (zero specificity so components can override). */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Respect reduced-motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Visually hidden (screen-reader only) + skip link. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -120px;
+  z-index: 1000;
+  padding: 10px 16px;
+  background: var(--color-brand);
+  color: #fff;
+  border-radius: 4px;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 8px;
 }
 
 /* Highlight in search results */
