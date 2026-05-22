@@ -24,17 +24,17 @@ export default async function NewsPage({
           <div className="space-y-4">
             {items.map((item) => (
               <Link key={item.slug} href={`/news/${item.slug}`} className="block group">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-raised hover:bg-brand-soft transition-colors border border-line">
                   <div className="flex items-start space-x-4">
-                    <div className="flex items-center text-gray-500 dark:text-gray-400 shrink-0">
+                    <div className="flex items-center text-ink-muted shrink-0">
                       <HiCalendar className="w-5 h-5 mr-2" />
-                      <time dateTime={item.date}>{item.date}</time>
+                      <time dateTime={item.date} className="font-display">{item.date}</time>
                     </div>
-                    <h3 className="text-gray-900 dark:text-gray-100 group-hover:text-black dark:group-hover:text-white transition-colors">
+                    <h3 className="text-ink group-hover:text-brand transition-colors">
                       {item.title}
                     </h3>
                   </div>
-                  <HiChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors shrink-0" />
+                  <HiChevronRight className="w-5 h-5 text-ink-subtle group-hover:text-brand transition-colors shrink-0" />
                 </div>
               </Link>
             ))}

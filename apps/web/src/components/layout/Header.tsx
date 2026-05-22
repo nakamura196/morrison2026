@@ -16,14 +16,14 @@ export default function Header() {
   const config = locale === 'en' ? configEn : configJa
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-surface-raised/90 border-b border-brand shadow-sm">
       <nav className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
           >
-            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <span className="text-xl sm:text-2xl font-bold font-serif text-brand">
               {config.siteName}
             </span>
           </Link>
@@ -32,28 +32,28 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/search"
-              className="flex items-center space-x-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
             >
               <HiSearch className="w-5 h-5" />
               <span>{t('search')}</span>
             </Link>
             <Link
               href="/fulltext-search"
-              className="flex items-center space-x-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
             >
               <HiDocumentText className="w-5 h-5" />
               <span>{t('fulltextSearch')}</span>
             </Link>
             <Link
               href="/about"
-              className="flex items-center space-x-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
             >
               <HiInformationCircle className="w-5 h-5" />
               <span>{t('about')}</span>
             </Link>
             <Link
               href="/news"
-              className="flex items-center space-x-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
             >
               <HiBell className="w-5 h-5" />
               <span>{t('news')}</span>
@@ -64,7 +64,7 @@ export default function Header() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+                className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
               >
                 <span>{locale === 'en' ? link.title_en : link.title}</span>
                 <HiExternalLink className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function Header() {
           <div className="flex items-center space-x-4 md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg text-ink hover:bg-brand-soft transition-colors"
             >
               <span className="sr-only">{t('openMenu')}</span>
               {isMenuOpen ? (
@@ -96,12 +96,12 @@ export default function Header() {
         <div
           className={`${
             isMenuOpen ? 'block' : 'hidden'
-          } md:hidden mt-4 rounded-lg bg-white dark:bg-gray-700 shadow-lg`}
+          } md:hidden mt-4 rounded-lg bg-surface-raised border border-line shadow-lg`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link
               href="/search"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-600 hover:bg-neutral-100 dark:text-gray-300 dark:hover:bg-neutral-800/40"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
               onClick={() => setIsMenuOpen(false)}
             >
               <HiSearch className="w-5 h-5" />
@@ -109,7 +109,7 @@ export default function Header() {
             </Link>
             <Link
               href="/fulltext-search"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-600 hover:bg-neutral-100 dark:text-gray-300 dark:hover:bg-neutral-800/40"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
               onClick={() => setIsMenuOpen(false)}
             >
               <HiDocumentText className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function Header() {
             </Link>
             <Link
               href="/about"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-600 hover:bg-neutral-100 dark:text-gray-300 dark:hover:bg-neutral-800/40"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
               onClick={() => setIsMenuOpen(false)}
             >
               <HiInformationCircle className="w-5 h-5" />
@@ -125,7 +125,7 @@ export default function Header() {
             </Link>
             <Link
               href="/news"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-600 hover:bg-neutral-100 dark:text-gray-300 dark:hover:bg-neutral-800/40"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
               onClick={() => setIsMenuOpen(false)}
             >
               <HiBell className="w-5 h-5" />
@@ -137,7 +137,7 @@ export default function Header() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-600 hover:bg-neutral-100 dark:text-gray-300 dark:hover:bg-neutral-800/40"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <span>{locale === 'en' ? link.title_en : link.title}</span>

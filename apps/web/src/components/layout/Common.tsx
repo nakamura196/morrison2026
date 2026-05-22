@@ -20,7 +20,7 @@ export default async function Common({
   const t = await getTranslations('Breadcrumb')
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen flex flex-col bg-surface">
       <Header />
 
       <main className="flex-1">
@@ -44,13 +44,13 @@ export default async function Common({
 
           {title && (
             <div className="text-center mb-12">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-ink mb-4 tracking-tight">
                 {title}
               </h1>
               <div className="flex items-center justify-center space-x-2">
-                <div className="h-1 w-12 bg-gray-400/30 dark:bg-gray-500/30 rounded-full" />
-                <div className="h-1 w-20 bg-gray-500 dark:bg-gray-400 rounded-full" />
-                <div className="h-1 w-12 bg-gray-400/30 dark:bg-gray-500/30 rounded-full" />
+                <div className="h-1 w-12 bg-brand/30 rounded-full" />
+                <div className="h-1 w-20 bg-brand rounded-full" />
+                <div className="h-1 w-12 bg-brand/30 rounded-full" />
               </div>
             </div>
           )}
