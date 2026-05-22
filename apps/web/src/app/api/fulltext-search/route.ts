@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { esSearch } from '@toyo/shared-lib'
+import { ensureEnv } from '@/libs/cf-env'
 
 const INDEX_NAME = process.env.FULLTEXT_INDEX_NAME || 'morrison'
 const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
@@ -128,6 +129,7 @@ function buildSortConfig(
 }
 
 export async function POST(request: NextRequest) {
+  ensureEnv()
   const body = await request.json()
   const { state }: { state: SearchState } = body
 
