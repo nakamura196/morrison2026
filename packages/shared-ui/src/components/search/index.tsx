@@ -86,23 +86,19 @@ const SearchUI = ({
           <Facets fields={facetOptions} t={t} themeColor={themeColor} />
         </div>
 
-        {/* 検索結果情報 */}
+        {/* 検索結果情報 + コントロール（件数・表示件数・ソート・ビュー切替を1行に） */}
         <div className="w-full">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white dark:bg-gray-800/90 rounded-xl border border-gray-200/80 dark:border-gray-700/80 backdrop-blur-sm">
             <div className="sui-paging-info">
               <PagingInfo t={t} />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3">
               <CustomResultPerPage t={t} themeColor={themeColor} />
+              {children.customControls}
             </div>
           </div>
         </div>
-
-        {/* カスタムコントロール */}
-        {children.customControls && (
-          <div className="w-full">{children.customControls}</div>
-        )}
 
         {/* 検索結果 */}
         <div className="w-full">{children.results}</div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { SearchProvider, withSearch } from '@elastic/react-search-ui'
 import { useTranslations } from 'next-intl'
 import { FulltextSearchConnector } from '@/libs/fulltext-search-connector'
@@ -13,7 +14,42 @@ import {
   SortBy,
 } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
-import Results from './Results'
+import Results, { type ViewMode } from './Results'
+
+function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mode: ViewMode) => void }) {
+  const t = useTranslations('SearchPage')
+
+  return (
+    <div className="flex gap-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+      <button
+        onClick={() => onChange('list')}
+        className={`px-3 py-2.5 text-sm font-medium transition-colors ${
+          viewMode === 'list'
+            ? 'bg-brand text-white'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+        }`}
+        title={t('viewList')}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <button
+        onClick={() => onChange('grid')}
+        className={`px-3 py-2.5 text-sm font-medium transition-colors ${
+          viewMode === 'grid'
+            ? 'bg-brand text-white'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+        }`}
+        title={t('viewGrid')}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+        </svg>
+      </button>
+    </div>
+  )
+}
 
 // Conditionally show Facets only after search
 const ConditionalFacetsView = ({
@@ -34,10 +70,10 @@ const ConditionalFacetsView = ({
   return (
     <>
       <div className="w-full">
-        <Filters fields={facetOptions} t={t} themeColor="blue" />
+        <Filters fields={facetOptions} t={t} themeColor="amber" />
       </div>
       <div className="w-full">
-        <Facets fields={facetOptions} t={t} themeColor="blue" />
+        <Facets fields={facetOptions} t={t} themeColor="amber" />
       </div>
     </>
   )
@@ -58,6 +94,8 @@ const connector = new FulltextSearchConnector({
 export default function FulltextSearch() {
   const t = useTranslations('FulltextSearchPage')
   const tSearch = useTranslations('SearchPage')
+  const tFacet = useTranslations('Facet')
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
 
   const facetOptions: FacetOption[] = [
     {
@@ -66,6 +104,32 @@ export default function FulltextSearch() {
       type: 'value',
       showSearch: true,
       size: 500,
+    },
+    {
+      label: tFacet('persName'),
+      field: 'ne_persName',
+      type: 'value',
+      showSearch: true,
+      size: 50,
+    },
+    {
+      label: tFacet('placeName'),
+      field: 'ne_placeName',
+      type: 'value',
+      showSearch: true,
+      size: 50,
+    },
+    {
+      label: tFacet('orgName'),
+      field: 'ne_orgName',
+      type: 'value',
+      size: 50,
+    },
+    {
+      label: tFacet('date'),
+      field: 'ne_date',
+      type: 'value',
+      size: 50,
     },
   ]
 
@@ -112,8 +176,12 @@ export default function FulltextSearch() {
           type: 'value' as const,
           size: 500,
         },
+        ne_persName: { type: 'value' as const, size: 50 },
+        ne_placeName: { type: 'value' as const, size: 50 },
+        ne_orgName: { type: 'value' as const, size: 50 },
+        ne_date: { type: 'value' as const, size: 50 },
       },
-      disjunctiveFacets: ['item_title'],
+      disjunctiveFacets: ['item_title', 'ne_persName', 'ne_placeName', 'ne_orgName', 'ne_date'],
     },
     initialState: {
       resultsPerPage: 20,
@@ -132,7 +200,7 @@ export default function FulltextSearch() {
 
         {/* Search Box */}
         <div className="w-full max-w-3xl mx-auto">
-          <SearchBox t={translations} themeColor="blue" showSearchButton />
+          <SearchBox t={translations} themeColor="amber" showSearchButton />
         </div>
 
         {/* Filters and Facets */}
@@ -144,22 +212,28 @@ export default function FulltextSearch() {
             <div className="sui-paging-info">
               <PagingInfo t={translations} />
             </div>
-            <div className="flex items-center gap-2">
-              <ResultsPerPage t={translations} themeColor="blue" />
-              <SortBy options={sortOptions} />
+            <div className="flex flex-wrap items-center gap-3">
+              <ResultsPerPage t={translations} themeColor="amber" />
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {tSearch('sortByLabel')}
+                </label>
+                <SortBy options={sortOptions} />
+              </div>
+              <ViewToggle viewMode={viewMode} onChange={setViewMode} />
             </div>
           </div>
         </div>
 
         {/* Search Results */}
         <div className="w-full">
-          <Results />
+          <Results viewMode={viewMode} />
         </div>
 
         {/* Pagination */}
         <div className="w-full">
           <div className="text-center mt-8">
-            <Paging t={translations} themeColor="blue" />
+            <Paging t={translations} themeColor="amber" />
           </div>
         </div>
       </div>

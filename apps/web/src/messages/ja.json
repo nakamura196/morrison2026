@@ -1,8 +1,33 @@
 {
+  "Viewer": {
+    "inPageSearch": "本文検索",
+    "pages": "ページ",
+    "ocr": "OCR",
+    "lines": "行",
+    "searchPlaceholder": "この資料内のOCRを検索",
+    "search": "検索",
+    "clear": "検索をクリア",
+    "noQuery": "キーワードを入力して資料内のOCRテキストを検索します。",
+    "noHits": "「{q}」にヒットはありません。",
+    "showing": "（表示中）",
+    "count": "{n}件",
+    "focusArea": "この領域にフォーカス",
+    "goToPage": "このページに移動",
+    "clickToFocus": "クリックでビューアにフォーカス",
+    "showAllOcr": "全てのOCR矩形を表示 ({n})",
+    "noLineData": "このページのOCR行データはありません。",
+    "notFound": "このページは見つかりませんでした。",
+    "loading": "読み込み中…",
+    "noImages": "画像がありません",
+    "moreHits": "他 {n} 件…",
+    "chars": "{n} 文字"
+  },
   "Common": {
     "title": "モリソンパンフレット統合データベース",
     "search": "検索",
-    "home": "ホーム"
+    "home": "ホーム",
+    "notFound": "このページは見つかりませんでした。",
+    "backHome": "ホームに戻る"
   },
   "Header": {
     "search": "検索",
@@ -39,6 +64,8 @@
     "reset": "リセット",
     "sortByLabel": "並び替え：",
     "sortRelevance": "関連度順",
+    "sortCallNumberAsc": "請求記号（昇順）",
+    "sortCallNumberDesc": "請求記号（降順）",
     "sortTitleAsc": "タイトル（昇順）",
     "sortTitleDesc": "タイトル（降順）",
     "sortAuthorAsc": "著者（昇順）",
@@ -99,6 +126,10 @@
     "author": "著者",
     "publicationYear": "出版年",
     "hasImage": "画像あり",
+    "persName": "人名（本文）",
+    "placeName": "地名（本文）",
+    "orgName": "組織・団体（本文）",
+    "date": "年・日付（本文）",
     "previous": "前へ",
     "next": "次へ"
   },

@@ -1,8 +1,33 @@
 {
+  "Viewer": {
+    "inPageSearch": "In-text search",
+    "pages": "Pages",
+    "ocr": "OCR",
+    "lines": "lines",
+    "searchPlaceholder": "Search OCR within this item",
+    "search": "Search",
+    "clear": "Clear search",
+    "noQuery": "Enter a keyword to search the OCR text within this item.",
+    "noHits": "No matches for \"{q}\".",
+    "showing": "(showing)",
+    "count": "{n}",
+    "focusArea": "Focus this region",
+    "goToPage": "Go to this page",
+    "clickToFocus": "Click to focus in viewer",
+    "showAllOcr": "Show all OCR boxes ({n})",
+    "noLineData": "No OCR line data for this page.",
+    "notFound": "This page was not found.",
+    "loading": "Loading…",
+    "noImages": "No images",
+    "moreHits": "{n} more…",
+    "chars": "{n} chars"
+  },
   "Common": {
     "title": "Morrison Pamphlets Integrated Database",
     "search": "Search",
-    "home": "Home"
+    "home": "Home",
+    "notFound": "This page could not be found.",
+    "backHome": "Back to home"
   },
   "Header": {
     "search": "Search",
@@ -39,6 +64,8 @@
     "reset": "Reset",
     "sortByLabel": "Sort by:",
     "sortRelevance": "Relevance",
+    "sortCallNumberAsc": "Call Number (Asc)",
+    "sortCallNumberDesc": "Call Number (Desc)",
     "sortTitleAsc": "Title (A-Z)",
     "sortTitleDesc": "Title (Z-A)",
     "sortAuthorAsc": "Author (A-Z)",
@@ -99,6 +126,10 @@
     "author": "Author",
     "publicationYear": "Publication Year",
     "hasImage": "Has Image",
+    "persName": "Person (in text)",
+    "placeName": "Place (in text)",
+    "orgName": "Organization (in text)",
+    "date": "Date (in text)",
     "previous": "Previous",
     "next": "Next"
   },

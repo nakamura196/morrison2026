@@ -44,9 +44,9 @@ function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mod
     <div className="flex gap-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
       <button
         onClick={() => onChange('list')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+        className={`px-3 py-2.5 text-sm font-medium transition-colors ${
           viewMode === 'list'
-            ? 'bg-neutral-700 dark:bg-neutral-600 text-white'
+            ? 'bg-brand text-white'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
         title={t('viewList')}
@@ -57,9 +57,9 @@ function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mod
       </button>
       <button
         onClick={() => onChange('grid')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+        className={`px-3 py-2.5 text-sm font-medium transition-colors ${
           viewMode === 'grid'
-            ? 'bg-neutral-700 dark:bg-neutral-600 text-white'
+            ? 'bg-brand text-white'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
         title={t('viewGrid')}
@@ -84,7 +84,7 @@ function SortSelector() {
       })}
     >
       {({ sortField, sortDirection, setSort }: Partial<SearchContextState>) => {
-        const currentSort = sortField ? `${sortField}_${sortDirection}` : 'relevance'
+        const currentSort = sortField ? `${sortField}_${sortDirection}` : 'callNumber_asc'
 
         const handleSortChange = (value: string) => {
           if (value === 'relevance') {
@@ -100,24 +100,44 @@ function SortSelector() {
             <label htmlFor="sort-select" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('sortByLabel')}
             </label>
-            <select
-              id="sort-select"
-              value={currentSort}
-              onChange={(e) => handleSortChange(e.target.value)}
-              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-neutral-500"
-            >
-              <option value="relevance">{t('sortRelevance')}</option>
-              <option value="title.keyword_asc">{t('sortTitleAsc')}</option>
-              <option value="title.keyword_desc">{t('sortTitleDesc')}</option>
-              <option value="heading1.keyword_asc">{t('sortAuthorAsc')}</option>
-              <option value="heading1.keyword_desc">{t('sortAuthorDesc')}</option>
-              <option value="publication_year_asc">{t('sortYearAsc')}</option>
-              <option value="publication_year_desc">{t('sortYearDesc')}</option>
-            </select>
+            <div className="relative">
+              <select
+                id="sort-select"
+                value={currentSort}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20 focus:border-amber-500 dark:focus:border-amber-400 cursor-pointer transition-all duration-200 text-sm font-medium shadow-sm"
+              >
+                <option value="callNumber_asc">{t('sortCallNumberAsc')}</option>
+                <option value="callNumber_desc">{t('sortCallNumberDesc')}</option>
+                <option value="relevance">{t('sortRelevance')}</option>
+                <option value="title.keyword_asc">{t('sortTitleAsc')}</option>
+                <option value="title.keyword_desc">{t('sortTitleDesc')}</option>
+                <option value="heading1.keyword_asc">{t('sortAuthorAsc')}</option>
+                <option value="heading1.keyword_desc">{t('sortAuthorDesc')}</option>
+                <option value="publication_year_asc">{t('sortYearAsc')}</option>
+                <option value="publication_year_desc">{t('sortYearDesc')}</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         )
       }}
     </WithSearch>
+  )
+}
+
+// 件数表示は SearchUI 内蔵の PagingInfo が担うため、ここではソート＋ビュー切替のみ。
+// SearchUI 側で表示件数セレクタと同じ行に並べられる。
+function CustomPagingInfo({ viewMode, onViewModeChange }: { viewMode: ViewMode; onViewModeChange: (mode: ViewMode) => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <SortSelector />
+      <ViewToggle viewMode={viewMode} onChange={onViewModeChange} />
+    </div>
   )
 }
 
@@ -152,7 +172,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
         // Grid view
         if (viewMode === 'grid') {
           return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {results.map((result, index) => {
                 const title = result.title?.raw || ''
                 const author = result.heading1?.raw
@@ -180,13 +200,13 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
                     href={`/item/${id}${queryString ? `?${queryString}` : ''}`}
                     className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors overflow-hidden"
                   >
-                    {/* Thumbnail */}
+                    {/* Thumbnail: 余白付きで全体表示（判型がバラバラなのでトリミングしない） */}
                     {thumbnailUrl && (
-                      <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-700">
+                      <div className="aspect-[3/4] bg-gray-50 dark:bg-gray-900/40 flex items-center justify-center p-2">
                         <img
                           src={thumbnailUrl}
                           alt={title}
-                          className="w-full h-full object-cover"
+                          className="max-w-full max-h-full object-contain"
                           loading="lazy"
                         />
                       </div>
@@ -214,7 +234,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
                           )}
                         </div>
                         <div className="flex justify-between items-center pt-1">
-                          {tag1 && <span className="text-green-600 dark:text-green-400 text-xs line-clamp-1">{tag1}</span>}
+                          {tag1 && <span className="text-xs line-clamp-1">{tag1}</span>}
                           {callNumber && <span className="text-xs">{callNumber}</span>}
                         </div>
                       </div>
@@ -336,7 +356,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
 
                       <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-2 flex flex-wrap justify-end gap-x-3">
                         {tag1 && (
-                          <span className="text-green-600 dark:text-green-400">{tag1}</span>
+                          <span>{tag1}</span>
                         )}
                         {callNumber && <span>{callNumber}</span>}
                       </div>
@@ -383,6 +403,30 @@ export default function SearchContent() {
       type: 'value',
       size: 10,
     },
+    {
+      label: tFacet('persName'),
+      field: 'ne_persName',
+      type: 'value',
+      size: 50,
+    },
+    {
+      label: tFacet('placeName'),
+      field: 'ne_placeName',
+      type: 'value',
+      size: 50,
+    },
+    {
+      label: tFacet('orgName'),
+      field: 'ne_orgName',
+      type: 'value',
+      size: 50,
+    },
+    {
+      label: tFacet('date'),
+      field: 'ne_date',
+      type: 'value',
+      size: 50,
+    },
   ]
 
   // Create translations object for shared-ui
@@ -421,8 +465,8 @@ export default function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gray-700 dark:bg-gray-800 text-white py-8">
+    <div className="min-h-screen bg-surface">
+      <div className="bg-enji-800 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-center">
             {translations.search || '検索'}
@@ -437,16 +481,12 @@ export default function SearchContent() {
           resultFields={resultFields}
           connector={connector}
           t={translations}
-          themeColor="neutral"
+          themeColor="amber"
+          sortField="callNumber"
         >
           {{
-            searchForm: <SearchBox t={translations} themeColor="neutral" showSearchButton />,
-            customControls: (
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-                <SortSelector />
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-              </div>
-            ),
+            searchForm: <SearchBox t={translations} themeColor="amber" showSearchButton />,
+            customControls: <CustomPagingInfo viewMode={viewMode} onViewModeChange={setViewMode} />,
             results: <Results viewMode={viewMode} />,
           }}
         </SearchUI>

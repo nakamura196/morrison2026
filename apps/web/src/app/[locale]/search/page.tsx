@@ -12,8 +12,8 @@ export function generateStaticParams() {
 
 function SearchLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gray-700 dark:bg-gray-800 text-white py-8">
+    <div className="min-h-screen bg-surface">
+      <div className="bg-enji-800 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-center">
             検索
