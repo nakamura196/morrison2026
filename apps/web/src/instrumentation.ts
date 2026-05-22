@@ -26,9 +26,11 @@ export async function register() {
       console.log('[instrumentation] no cfEnv available')
       return
     }
+    console.log('[instrumentation] cfEnv keys:', Object.keys(cfEnv).join(','))
+    console.log('[instrumentation] pre process.env.ES_URL=', JSON.stringify(process.env.ES_URL))
     const copied: string[] = []
     for (const [k, v] of Object.entries(cfEnv)) {
-      if (typeof v === 'string' && process.env[k] === undefined) {
+      if (typeof v === 'string') {
         process.env[k] = v
         copied.push(k)
       }
