@@ -4,11 +4,13 @@ import {
   getAllowedIndices,
   fetchFromOpenSearch,
 } from '@toyo/shared-lib';
+import { ensureEnv } from '@/libs/cf-env';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ index: string }> }
 ) {
+  ensureEnv();
   const { index } = await params;
 
   // Validate index
@@ -66,6 +68,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ index: string }> }
 ) {
+  ensureEnv();
   const { index } = await params;
 
   const allowedIndices = getAllowedIndices();

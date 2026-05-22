@@ -125,25 +125,20 @@ export function getAllowedIndices(): string[] {
 }
 
 /**
- * Fetch from OpenSearch with authentication
+ * Fetch from Elasticsearch (via Cloudflare Access Service Token)
  */
 export async function fetchFromOpenSearch(
   path: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const esHost = process.env.ES_HOST || 'http://localhost:9200';
-  const esUsername = process.env.ES_USERNAME || '';
-  const esPassword = process.env.ES_PASSWORD || '';
+  const esHost = process.env.ES_URL || 'http://localhost:9200';
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    'CF-Access-Client-Id': process.env.CF_ACCESS_CLIENT_ID || '',
+    'CF-Access-Client-Secret': process.env.CF_ACCESS_CLIENT_SECRET || '',
     ...(options.headers || {}),
   };
-
-  if (esUsername && esPassword) {
-    const auth = Buffer.from(`${esUsername}:${esPassword}`).toString('base64');
-    (headers as Record<string, string>)['Authorization'] = `Basic ${auth}`;
-  }
 
   return fetch(`${esHost}${path}`, {
     ...options,
