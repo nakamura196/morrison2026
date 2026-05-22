@@ -3,16 +3,14 @@
  */
 
 /**
- * Create authentication headers for Elasticsearch/OpenSearch
+ * Create authentication headers for Elasticsearch
+ * (via Cloudflare Access Service Token)
  */
-export const createHeaders = (username?: string, password?: string) => {
-  const user = username || process.env.ES_USERNAME || ''
-  const pass = password || process.env.ES_PASSWORD || ''
-  const auth = Buffer.from(`${user}:${pass}`).toString('base64')
-
+export const createHeaders = () => {
   return {
     'Content-Type': 'application/json',
-    Authorization: `Basic ${auth}`,
+    'CF-Access-Client-Id': process.env.CF_ACCESS_CLIENT_ID || '',
+    'CF-Access-Client-Secret': process.env.CF_ACCESS_CLIENT_SECRET || '',
   }
 }
 

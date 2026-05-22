@@ -82,17 +82,14 @@ export async function esSearch(
   }
   error?: unknown
 }> {
-  const esHost = process.env.ES_HOST || process.env.ES_URL || ''
-  const esUsername = process.env.ES_USERNAME || ''
-  const esPassword = process.env.ES_PASSWORD || ''
-
-  const auth = Buffer.from(`${esUsername}:${esPassword}`).toString('base64')
+  const esHost = process.env.ES_URL || ''
 
   const response = await fetch(`${esHost}/${index}/_search`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Basic ${auth}`,
+      'CF-Access-Client-Id': process.env.CF_ACCESS_CLIENT_ID || '',
+      'CF-Access-Client-Secret': process.env.CF_ACCESS_CLIENT_SECRET || '',
     },
     body: JSON.stringify(query),
   })
