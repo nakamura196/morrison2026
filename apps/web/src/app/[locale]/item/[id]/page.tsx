@@ -12,7 +12,7 @@ import ItemViewer from '@/components/pages/item/ItemViewer'
 import ItemShareExport from '@/components/pages/item/ItemShareExport'
 
 const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
-  const host = process.env.ES_HOST || ''
+  const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
   try {
@@ -44,7 +44,7 @@ const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; r
 })
 
 const getIndexLastUpdated = cache(async (): Promise<number | null> => {
-  const host = process.env.ES_HOST || ''
+  const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
   try {
@@ -218,8 +218,8 @@ export default async function ItemPage({
         />
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          <div className="px-6 py-4 bg-surface-sunken border-b border-brand">
+            <h2 className="text-lg font-bold text-ink">
               {t('bibliographicInfo')}
             </h2>
           </div>
@@ -387,7 +387,7 @@ export default async function ItemPage({
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {t('classification')}
                 </dt>
-                <dd className="mt-1 text-sm text-green-600 dark:text-green-400 sm:col-span-3 sm:mt-0">
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {item.tag1}
                 </dd>
               </div>
@@ -399,7 +399,7 @@ export default async function ItemPage({
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {t('subClassification')}
                 </dt>
-                <dd className="mt-1 text-sm text-green-600 dark:text-green-400 sm:col-span-3 sm:mt-0">
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {[item.tag2, item.tag3].filter(Boolean).join(' > ')}
                 </dd>
               </div>
@@ -429,7 +429,7 @@ export default async function ItemPage({
                       href={item.isPartOf}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                      className="text-brand hover:text-brand-strong underline"
                     >
                       {item.isPartOf}
                     </a>
@@ -452,7 +452,7 @@ export default async function ItemPage({
                       href={item.references}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                      className="text-brand hover:text-brand-strong underline"
                     >
                       {item.references}
                     </a>
@@ -476,7 +476,7 @@ export default async function ItemPage({
         <div className="mt-6 text-center">
           <Link
             href={searchHref}
-            className="inline-flex items-center text-sm text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white"
+            className="inline-flex items-center text-sm text-brand hover:text-brand-strong"
           >
             <svg className="mr-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

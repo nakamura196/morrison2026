@@ -1,24 +1,33 @@
 import BackToTopButtonClient from '@/components/layout/BackToTopButtonClient'
 import { GoogleAnalytics } from '@toyo/shared-ui'
-import { Noto_Sans_JP, Noto_Sans } from 'next/font/google'
+import { BIZ_UDPGothic, BIZ_UDPMincho, EB_Garamond } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import './globals.css'
 
 const GA_TAG_ID = process.env.NEXT_PUBLIC_GA_ID || ''
 
-const notoSansJP = Noto_Sans_JP({
+// Toyo Bunko web fonts. Phase 1: mirrors @toyo/design-system/fonts (inlined
+// until the design-system package is wired as a dependency).
+const bizGothic = BIZ_UDPGothic({
   subsets: ['latin'],
   weight: ['400', '700'],
   display: 'swap',
-  variable: '--font-noto-sans-jp',
+  variable: '--font-biz-gothic',
 })
 
-const notoSans = Noto_Sans({
-  subsets: ['latin', 'latin-ext'],
+const bizMincho = BIZ_UDPMincho({
+  subsets: ['latin'],
   weight: ['400', '700'],
   display: 'swap',
-  variable: '--font-noto-sans',
+  variable: '--font-biz-mincho',
+})
+
+const ebGaramond = EB_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-eb-garamond',
 })
 
 import ThemeProvider from '@/theme/theme-provider'
@@ -52,7 +61,7 @@ export default async function RootLayout({
           <GoogleAnalytics gaTagId={GA_TAG_ID} />
         </Suspense>
       ) : null}</head>
-      <body className={`${notoSans.variable} ${notoSansJP.variable} font-sans`}>
+      <body className={`${bizGothic.variable} ${bizMincho.variable} ${ebGaramond.variable} font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -39,6 +39,8 @@
     "reset": "リセット",
     "sortByLabel": "並び替え：",
     "sortRelevance": "関連度順",
+    "sortCallNumberAsc": "請求記号（昇順）",
+    "sortCallNumberDesc": "請求記号（降順）",
     "sortTitleAsc": "タイトル（昇順）",
     "sortTitleDesc": "タイトル（降順）",
     "sortAuthorAsc": "著者（昇順）",

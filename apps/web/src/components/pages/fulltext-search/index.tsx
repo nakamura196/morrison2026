@@ -34,10 +34,10 @@ const ConditionalFacetsView = ({
   return (
     <>
       <div className="w-full">
-        <Filters fields={facetOptions} t={t} themeColor="blue" />
+        <Filters fields={facetOptions} t={t} themeColor="amber" />
       </div>
       <div className="w-full">
-        <Facets fields={facetOptions} t={t} themeColor="blue" />
+        <Facets fields={facetOptions} t={t} themeColor="amber" />
       </div>
     </>
   )
@@ -132,7 +132,7 @@ export default function FulltextSearch() {
 
         {/* Search Box */}
         <div className="w-full max-w-3xl mx-auto">
-          <SearchBox t={translations} themeColor="blue" showSearchButton />
+          <SearchBox t={translations} themeColor="amber" showSearchButton />
         </div>
 
         {/* Filters and Facets */}
@@ -145,7 +145,7 @@ export default function FulltextSearch() {
               <PagingInfo t={translations} />
             </div>
             <div className="flex items-center gap-2">
-              <ResultsPerPage t={translations} themeColor="blue" />
+              <ResultsPerPage t={translations} themeColor="amber" />
               <SortBy options={sortOptions} />
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function FulltextSearch() {
         {/* Pagination */}
         <div className="w-full">
           <div className="text-center mt-8">
-            <Paging t={translations} themeColor="blue" />
+            <Paging t={translations} themeColor="amber" />
           </div>
         </div>
       </div>

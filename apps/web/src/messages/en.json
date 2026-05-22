@@ -39,6 +39,8 @@
     "reset": "Reset",
     "sortByLabel": "Sort by:",
     "sortRelevance": "Relevance",
+    "sortCallNumberAsc": "Call Number (Asc)",
+    "sortCallNumberDesc": "Call Number (Desc)",
     "sortTitleAsc": "Title (A-Z)",
     "sortTitleDesc": "Title (Z-A)",
     "sortAuthorAsc": "Author (A-Z)",

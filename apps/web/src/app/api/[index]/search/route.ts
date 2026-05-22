@@ -24,13 +24,10 @@ type State = {
 }
 
 function createHeaders() {
-  const user = process.env.ES_USERNAME || ''
-  const password = process.env.ES_PASSWORD || ''
-  const auth = Buffer.from(`${user}:${password}`).toString('base64')
-
   return {
     'Content-Type': 'application/json',
-    Authorization: `Basic ${auth}`,
+    'CF-Access-Client-Id': process.env.CF_ACCESS_CLIENT_ID || '',
+    'CF-Access-Client-Secret': process.env.CF_ACCESS_CLIENT_SECRET || '',
   }
 }
 
@@ -280,7 +277,7 @@ export async function POST(
 ) {
   const body = await request.json()
   const { index } = await params
-  const host = process.env.ES_HOST || ''
+  const host = process.env.ES_URL || ''
   const state = body.state || body.requestState
   const queryConfig = body.queryConfig
 

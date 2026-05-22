@@ -46,7 +46,7 @@ function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mod
         onClick={() => onChange('list')}
         className={`px-3 py-1.5 text-sm font-medium transition-colors ${
           viewMode === 'list'
-            ? 'bg-neutral-700 dark:bg-neutral-600 text-white'
+            ? 'bg-brand text-white'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
         title={t('viewList')}
@@ -59,7 +59,7 @@ function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mod
         onClick={() => onChange('grid')}
         className={`px-3 py-1.5 text-sm font-medium transition-colors ${
           viewMode === 'grid'
-            ? 'bg-neutral-700 dark:bg-neutral-600 text-white'
+            ? 'bg-brand text-white'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
         title={t('viewGrid')}
@@ -84,7 +84,7 @@ function SortSelector() {
       })}
     >
       {({ sortField, sortDirection, setSort }: Partial<SearchContextState>) => {
-        const currentSort = sortField ? `${sortField}_${sortDirection}` : 'relevance'
+        const currentSort = sortField ? `${sortField}_${sortDirection}` : 'callNumber_asc'
 
         const handleSortChange = (value: string) => {
           if (value === 'relevance') {
@@ -106,6 +106,8 @@ function SortSelector() {
               onChange={(e) => handleSortChange(e.target.value)}
               className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-neutral-500"
             >
+              <option value="callNumber_asc">{t('sortCallNumberAsc')}</option>
+              <option value="callNumber_desc">{t('sortCallNumberDesc')}</option>
               <option value="relevance">{t('sortRelevance')}</option>
               <option value="title.keyword_asc">{t('sortTitleAsc')}</option>
               <option value="title.keyword_desc">{t('sortTitleDesc')}</option>
@@ -114,6 +116,48 @@ function SortSelector() {
               <option value="publication_year_asc">{t('sortYearAsc')}</option>
               <option value="publication_year_desc">{t('sortYearDesc')}</option>
             </select>
+          </div>
+        )
+      }}
+    </WithSearch>
+  )
+}
+
+function CustomPagingInfo({ viewMode, onViewModeChange }: { viewMode: ViewMode; onViewModeChange: (mode: ViewMode) => void }) {
+  const tSearch = useTranslations('SearchPage')
+
+  return (
+    <WithSearch
+      mapContextToProps={({ results, searchTerm, current, resultsPerPage, totalResults }: Partial<SearchContextState>) => ({
+        results,
+        searchTerm,
+        current,
+        resultsPerPage,
+        totalResults,
+      })}
+    >
+      {({ searchTerm, current = 1, resultsPerPage = 20, totalResults = 0 }: Partial<SearchContextState>) => {
+        const start = (current - 1) * resultsPerPage + 1
+        const end = Math.min(current * resultsPerPage, totalResults)
+
+        return (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            {/* Left: Result count and search term */}
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              {tSearch('showing')} <strong>{start}</strong> - <strong>{end}</strong> {tSearch('of')} <strong>{totalResults}</strong>
+              {searchTerm && (
+                <span className="ml-2">
+                  ({tSearch('searchKeyword')}
+                  <strong>{tSearch('quotationStart')}{searchTerm}{tSearch('quotationEnd')}</strong>)
+                </span>
+              )}
+            </div>
+
+            {/* Right: Sort and View controls */}
+            <div className="flex items-center gap-3">
+              <SortSelector />
+              <ViewToggle viewMode={viewMode} onChange={onViewModeChange} />
+            </div>
           </div>
         )
       }}
@@ -214,7 +258,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
                           )}
                         </div>
                         <div className="flex justify-between items-center pt-1">
-                          {tag1 && <span className="text-green-600 dark:text-green-400 text-xs line-clamp-1">{tag1}</span>}
+                          {tag1 && <span className="text-xs line-clamp-1">{tag1}</span>}
                           {callNumber && <span className="text-xs">{callNumber}</span>}
                         </div>
                       </div>
@@ -336,7 +380,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
 
                       <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-2 flex flex-wrap justify-end gap-x-3">
                         {tag1 && (
-                          <span className="text-green-600 dark:text-green-400">{tag1}</span>
+                          <span>{tag1}</span>
                         )}
                         {callNumber && <span>{callNumber}</span>}
                       </div>
@@ -421,8 +465,8 @@ export default function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gray-700 dark:bg-gray-800 text-white py-8">
+    <div className="min-h-screen bg-surface">
+      <div className="bg-enji-800 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-center">
             {translations.search || '検索'}
@@ -437,16 +481,15 @@ export default function SearchContent() {
           resultFields={resultFields}
           connector={connector}
           t={translations}
-          themeColor="neutral"
+          themeColor="amber"
+          initialState={{
+            sortField: 'callNumber',
+            sortDirection: 'asc',
+          }}
         >
           {{
-            searchForm: <SearchBox t={translations} themeColor="neutral" showSearchButton />,
-            customControls: (
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-                <SortSelector />
-                <ViewToggle viewMode={viewMode} onChange={setViewMode} />
-              </div>
-            ),
+            searchForm: <SearchBox t={translations} themeColor="amber" showSearchButton />,
+            customControls: <CustomPagingInfo viewMode={viewMode} onViewModeChange={setViewMode} />,
             results: <Results viewMode={viewMode} />,
           }}
         </SearchUI>

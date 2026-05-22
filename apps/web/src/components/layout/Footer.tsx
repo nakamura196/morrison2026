@@ -22,29 +22,29 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-gray-900 dark:bg-gray-950 border-t border-gray-800 dark:border-gray-800">
+    <footer className="bg-surface text-ink border-t border-brand">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Column 1: Site info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
+            <h3 className="font-serif text-base text-brand border-b border-brand pb-2">
               {config.siteName}
             </h3>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <p className="text-sm text-ink-muted leading-relaxed">
               {config.siteDescription}
             </p>
           </div>
 
           {/* Column 2: About & News */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
+            <h3 className="font-serif text-base text-brand border-b border-brand pb-2">
               {labels.about}
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/about"
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-ink-muted hover:text-brand transition-colors"
                 >
                   {labels.aboutLink}
                 </Link>
@@ -52,7 +52,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/news"
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-ink-muted hover:text-brand transition-colors"
                 >
                   {labels.news}
                 </Link>
@@ -62,14 +62,14 @@ export default function Footer() {
 
           {/* Column 3: Search */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
+            <h3 className="font-serif text-base text-brand border-b border-brand pb-2">
               {labels.search}
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/search"
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-ink-muted hover:text-brand transition-colors"
                 >
                   {labels.searchLink}
                 </Link>
@@ -77,7 +77,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/fulltext-search"
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-ink-muted hover:text-brand transition-colors"
                 >
                   {labels.fulltextSearch}
                 </Link>
@@ -87,7 +87,7 @@ export default function Footer() {
 
           {/* Column 4: Related links */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-200">
+            <h3 className="font-serif text-base text-brand border-b border-brand pb-2">
               {labels.relatedLinks}
             </h3>
             <ul className="space-y-2">
@@ -97,7 +97,7 @@ export default function Footer() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors"
+                    className="inline-flex items-center text-sm text-ink-muted hover:text-brand transition-colors"
                   >
                     {locale === 'en' ? link.title_en : link.title}
                     <HiExternalLink className="ml-1 w-3 h-3" />
@@ -108,15 +108,18 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-700 pt-6">
-          <p className="text-sm text-center text-gray-500">
+      </div>
+
+      {/* Policy / copyright bar (official p-ft__pnavWrap: enji ground) */}
+      <div className="bg-brand">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <p className="text-sm text-center text-white">
             &copy; {new Date().getFullYear()}{' '}
             <a
               href="http://www.toyo-bunko.or.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white"
+              className="underline hover:no-underline"
             >
               {labels.copyright}
             </a>
