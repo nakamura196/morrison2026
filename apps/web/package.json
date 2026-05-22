@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "gen:content": "node scripts/gen-content.mjs",
+    "predev": "node scripts/gen-content.mjs",
     "dev": "next dev --turbo -p 3106",
+    "prebuild": "node scripts/gen-content.mjs",
     "build": "next build",
     "build:cloudflare": "npx @opennextjs/cloudflare build",
     "start": "next start",

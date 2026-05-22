@@ -1,15 +1,7 @@
-import fs from 'fs'
-import path from 'path'
+import { pages, news as newsRaw } from '@/content/generated'
 
 export function getContent(slug: string, locale: string): string {
-  const filePath = path.join(process.cwd(), 'src/content', `${slug}.${locale}.md`)
-  try {
-    return fs.readFileSync(filePath, 'utf-8')
-  } catch {
-    // Fallback to Japanese
-    const fallbackPath = path.join(process.cwd(), 'src/content', `${slug}.ja.md`)
-    return fs.readFileSync(fallbackPath, 'utf-8')
-  }
+  return pages[`${slug}.${locale}`] ?? pages[`${slug}.ja`] ?? ''
 }
 
 export interface NewsItem {
@@ -31,40 +23,25 @@ function parseFrontmatter(content: string): { meta: Record<string, string>; body
   return { meta, body: match[2].trim() }
 }
 
-export function getNewsItems(locale: string): NewsItem[] {
-  const newsDir = path.join(process.cwd(), 'src/content/news')
-  if (!fs.existsSync(newsDir)) return []
-
-  const files = fs.readdirSync(newsDir).filter(f => f.endsWith('.md')).sort().reverse()
-
-  return files.map(file => {
-    const raw = fs.readFileSync(path.join(newsDir, file), 'utf-8')
-    const { meta, body } = parseFrontmatter(raw)
-    const slug = file.replace(/\.md$/, '')
-    const titleKey = locale === 'en' ? 'title_en' : 'title'
-
-    return {
-      slug,
-      date: meta.date || slug.slice(0, 10),
-      title: meta[titleKey] || meta.title || slug,
-      body,
-    }
-  })
-}
-
-export function getNewsItem(slug: string, locale: string): NewsItem | null {
-  const newsDir = path.join(process.cwd(), 'src/content/news')
-  const filePath = path.join(newsDir, `${slug}.md`)
-  if (!fs.existsSync(filePath)) return null
-
-  const raw = fs.readFileSync(filePath, 'utf-8')
+function toNewsItem(slug: string, raw: string, locale: string): NewsItem {
   const { meta, body } = parseFrontmatter(raw)
   const titleKey = locale === 'en' ? 'title_en' : 'title'
-
   return {
     slug,
     date: meta.date || slug.slice(0, 10),
     title: meta[titleKey] || meta.title || slug,
     body,
   }
+}
+
+export function getNewsItems(locale: string): NewsItem[] {
+  // newest first
+  return [...newsRaw]
+    .sort((a, b) => (a.slug < b.slug ? 1 : -1))
+    .map(({ slug, raw }) => toNewsItem(slug, raw, locale))
+}
+
+export function getNewsItem(slug: string, locale: string): NewsItem | null {
+  const found = newsRaw.find((n) => n.slug === slug)
+  return found ? toNewsItem(found.slug, found.raw, locale) : null
 }
