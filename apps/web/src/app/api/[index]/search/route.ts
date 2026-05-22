@@ -1,5 +1,7 @@
 import { highlightFields } from '@/config/search'
 
+export const runtime = 'nodejs'
+
 type Filter = {
   field: string
   values: (number | string | boolean)[]
