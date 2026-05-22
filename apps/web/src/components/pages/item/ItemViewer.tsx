@@ -1,24 +1,30 @@
 'use client'
 
-import { MiradorViewer } from '@toyo/shared-ui'
-import { useLocale } from 'next-intl'
+import dynamic from 'next/dynamic'
+import type { OcrPage } from './BookViewer'
+
+// OpenSeadragon touches `window` at import time, so load the viewer client-only.
+const BookViewer = dynamic(() => import('./BookViewer'), { ssr: false })
 
 interface ItemViewerProps {
-  manifestUrl: string
-  searchQuery?: string
+  /** callNumber (morrison_bib _id) — used to fetch the IIIF manifest. */
+  itemId: string
+  /** OCR text + line bboxes per page, from the morrison index. */
+  ocrPages: OcrPage[]
+  /** 1-indexed document page to open at (from a full-text search hit). */
+  initialPage?: number
+  /** search term to highlight on arrival. */
+  searchQuery?: string | null
 }
 
-export default function ItemViewer({ manifestUrl, searchQuery }: ItemViewerProps) {
-  const locale = useLocale()
-
+export default function ItemViewer({ itemId, ocrPages, initialPage, searchQuery }: ItemViewerProps) {
   return (
-    <div className="mb-6 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-      <MiradorViewer
-        manifestUrl={manifestUrl}
-        isEmbed
-        locale={locale}
-        searchQuery={searchQuery}
-        height="60vh"
+    <div className="rounded-lg overflow-hidden">
+      <BookViewer
+        itemId={itemId}
+        ocrPages={ocrPages}
+        initialPage={initialPage}
+        query={searchQuery}
       />
     </div>
   )

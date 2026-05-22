@@ -3,11 +3,15 @@
 import { withSearch } from '@elastic/react-search-ui'
 import type { SearchResult } from '@elastic/search-ui'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { Link } from '@/i18n/routing'
+
+export type ViewMode = 'list' | 'grid'
 
 interface ResultsProps {
   results: SearchResult[]
   searchTerm: string
+  viewMode: ViewMode
 }
 
 function getRawValue(result: SearchResult, field: string): string {
@@ -16,7 +20,7 @@ function getRawValue(result: SearchResult, field: string): string {
   return String(val)
 }
 
-function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: string }) {
+function ResultItem({ result, searchTerm, viewMode }: { result: SearchResult; searchTerm: string; viewMode: ViewMode }) {
   const t = useTranslations('FulltextSearchPage')
 
   const callNumber = getRawValue(result, 'item_id') // callNumber as item ID
@@ -25,15 +29,98 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
   const itemTitle = getRawValue(result, 'item_title')
   const author = getRawValue(result, 'author')
   const classification = getRawValue(result, 'classification')
-  const thumbnailUrl = getRawValue(result, 'thumbnail_url')
+  const pageThumbnailUrl = getRawValue(result, 'page_thumbnail_url')
+  const itemThumbnailUrl = getRawValue(result, 'thumbnail_url')
   const hasImage = result['has_image']?.raw
 
-  // Build Mirador viewer URL (ID is callNumber)
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
-  const manifestUrl = `${siteUrl}/api/iiif/3/${callNumber}/manifest`
-  const canvasUrl = `${siteUrl}/api/iiif/3/${callNumber}/canvas/p${page}`
-  const viewerUrl = `/mirador?iiif-content=${encodeURIComponent(manifestUrl)}&canvas=${encodeURIComponent(canvasUrl)}&q=${encodeURIComponent(searchTerm)}`
+  // ページ画像を優先し、404 (移行未完アイテム等) ならアイテム代表画像へフォールバック。
+  // 失敗した URL を記録する方式: 結果が差し替わると pageThumbnailUrl が新 URL に
+  // なり古い failedSrc と一致しなくなるため、effect 無しで自然にリセットされる。
+  const [failedSrc, setFailedSrc] = useState('')
+  const primaryThumb = pageThumbnailUrl || itemThumbnailUrl
+  const thumbnailUrl =
+    primaryThumb && primaryThumb === failedSrc ? itemThumbnailUrl : primaryThumb
 
+  // Detail page URL: open the item viewer at the matched page (docpage) and
+  // carry the search term (q) so it is highlighted in-image on arrival.
+  const detailParams = new URLSearchParams()
+  if (searchTerm) detailParams.set('q', searchTerm)
+  if (page) detailParams.set('docpage', page)
+  const detailQs = detailParams.toString()
+  const detailUrl = `/item/${callNumber}${detailQs ? `?${detailQs}` : ''}`
+  // Some OCR hits have no bibliographic match (orphan pages not in morrison_bib),
+  // so callNumber is empty. Those have no detail page — never link to `/item/`
+  // (which collapses to `/item` and 404s); render them non-clickable instead.
+  const hasDetail = callNumber !== ''
+
+  // Grid view: ページ画像を主役にしたカード。カード全体が（画像があれば）ビューアへのリンク。
+  if (viewMode === 'grid') {
+    const cardClass =
+      'group flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-neutral-400 dark:hover:border-neutral-500 hover:shadow-md transition-all overflow-hidden'
+    const cardBody = (
+      <>
+        {/* Thumbnail: 余白付きで全体表示 */}
+        <div className="relative aspect-[3/4] bg-gray-50 dark:bg-gray-900/40 flex items-center justify-center p-2">
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={itemTitle}
+              className="max-w-full max-h-full object-contain"
+              loading="lazy"
+              onError={() => {
+                if (thumbnailUrl && thumbnailUrl !== itemThumbnailUrl) {
+                  setFailedSrc(thumbnailUrl)
+                }
+              }}
+            />
+          ) : (
+            <span className="text-xs text-gray-400 dark:text-gray-500">No image</span>
+          )}
+          {page && (
+            <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-black/60 text-white">
+              {t('page')}: {page}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-1 flex-col p-2.5">
+          <div className="flex flex-wrap items-center gap-1 mb-1">
+            {callNumber && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100">
+                {callNumber}
+              </span>
+            )}
+            {classification && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                {classification}
+              </span>
+            )}
+          </div>
+          {itemTitle && (
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:underline">
+              {itemTitle}
+            </h3>
+          )}
+          {textSnippet && (
+            <p
+              className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: textSnippet }}
+            />
+          )}
+        </div>
+      </>
+    )
+    return hasDetail ? (
+      <Link href={detailUrl} className={cardClass}>
+        {cardBody}
+      </Link>
+    ) : (
+      <div className={cardClass}>{cardBody}</div>
+    )
+  }
+
+  // List view
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -45,6 +132,13 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
               alt={itemTitle}
               className="h-24 sm:h-28 w-auto object-contain rounded border border-gray-200 dark:border-gray-600"
               loading="lazy"
+              onError={() => {
+                // 表示中の URL が item サムネ以外 (= page サムネ) なら失敗を記録し、
+                // item サムネへ切り替える。item サムネ自体の失敗ではループしない。
+                if (thumbnailUrl && thumbnailUrl !== itemThumbnailUrl) {
+                  setFailedSrc(thumbnailUrl)
+                }
+              }}
             />
           </div>
         )}
@@ -56,7 +150,7 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
             <div className="flex flex-wrap items-center gap-2">
               {callNumber && (
                 <Link
-                  href={`/item/${callNumber}`}
+                  href={detailUrl}
                   className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100 hover:bg-neutral-300 dark:hover:bg-neutral-600"
                 >
                   {callNumber}
@@ -73,9 +167,9 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
                 </span>
               )}
             </div>
-            {hasImage && (
+            {hasImage && hasDetail && (
               <Link
-                href={viewerUrl}
+                href={detailUrl}
                 className="inline-flex items-center text-sm font-medium text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white"
               >
                 {t('viewInViewer')}
@@ -89,9 +183,13 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
           {/* Title */}
           {itemTitle && (
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              <Link href={`/item/${callNumber}`} className="hover:text-black dark:hover:text-white">
-                {itemTitle}
-              </Link>
+              {hasDetail ? (
+                <Link href={detailUrl} className="hover:text-black dark:hover:text-white">
+                  {itemTitle}
+                </Link>
+              ) : (
+                <span>{itemTitle}</span>
+              )}
               {author && (
                 <span className="text-sm text-gray-500 dark:text-gray-400 font-normal ml-2">
                   {author}
@@ -115,21 +213,34 @@ function ResultItem({ result, searchTerm }: { result: SearchResult; searchTerm: 
   )
 }
 
-function CustomResults({ results, searchTerm }: ResultsProps) {
+function CustomResults({ results, searchTerm, viewMode }: ResultsProps) {
   if (!results || results.length === 0) {
     return null
+  }
+
+  if (viewMode === 'grid') {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        {results.map((result, index) => (
+          <ResultItem key={index} result={result} searchTerm={searchTerm} viewMode="grid" />
+        ))}
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
       {results.map((result, index) => (
-        <ResultItem key={index} result={result} searchTerm={searchTerm} />
+        <ResultItem key={index} result={result} searchTerm={searchTerm} viewMode="list" />
       ))}
     </div>
   )
 }
 
-export default withSearch(({ results, searchTerm }) => ({
+export default withSearch<
+  { viewMode: ViewMode },
+  { results: SearchResult[]; searchTerm: string }
+>(({ results, searchTerm }) => ({
   results,
-  searchTerm,
+  searchTerm: searchTerm ?? '',
 }))(CustomResults)

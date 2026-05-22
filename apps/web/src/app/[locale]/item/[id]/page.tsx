@@ -6,13 +6,17 @@ import { cache } from 'react'
 import { getDefaultMetadata } from '@/libs/metadata'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createHeaders } from '@/libs/api'
+import { esSearch } from '@toyo/shared-lib'
 import { Link } from '@/i18n/routing'
 import type { MorrisonItem } from '@/types/morrison'
 import ItemViewer from '@/components/pages/item/ItemViewer'
+import type { OcrPage } from '@/components/pages/item/BookViewer'
 import ItemShareExport from '@/components/pages/item/ItemShareExport'
+import { ensureEnv } from '@/libs/cf-env'
 
 const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
-  const host = process.env.ES_HOST || ''
+  ensureEnv()
+  const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
   try {
@@ -43,8 +47,49 @@ const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; r
   }
 })
 
+// OCR text + line bboxes for every page of an item (keyed by omeka_id =
+// the morrison OCR index's item_id). `coords` is written by
+// scripts/index-ocr-coords.py; absent until that batch runs (viewer degrades
+// to text-only in-page search).
+const getOcrPages = cache(async (omekaId: string | number): Promise<OcrPage[]> => {
+  ensureEnv()
+  const ocrIndex = process.env.FULLTEXT_INDEX_NAME || 'morrison'
+  try {
+    const data = await esSearch(ocrIndex, {
+      size: 2000,
+      _source: ['page', 'text', 'coords'],
+      query: { term: { item_id: String(omekaId) } },
+    })
+    const hits = (data.hits?.hits || []) as Array<{
+      _source: {
+        page?: string | number
+        text?: string
+        coords?: { w?: number; h?: number; lines?: { t: string; x: number; y: number; w: number; h: number }[] }
+      }
+    }>
+    return hits.map((h) => {
+      const s = h._source
+      const c = s.coords
+      return {
+        page: Number(s.page),
+        text: s.text ?? null,
+        w: c?.w ?? null,
+        h: c?.h ?? null,
+        // map the stored {t,x,y,w,h} shape onto the viewer's {text,x,y,w,h}
+        lines: Array.isArray(c?.lines)
+          ? c!.lines.map((l) => ({ text: l.t, x: l.x, y: l.y, w: l.w, h: l.h }))
+          : null,
+      }
+    })
+  } catch (error) {
+    console.error('Failed to fetch OCR pages:', error)
+    return []
+  }
+})
+
 const getIndexLastUpdated = cache(async (): Promise<number | null> => {
-  const host = process.env.ES_HOST || ''
+  ensureEnv()
+  const host = process.env.ES_URL || ''
   const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
   try {
@@ -98,7 +143,7 @@ export default async function ItemPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ q?: string; page?: string; size?: string; pos?: string; filters?: string }>
+  searchParams: Promise<{ q?: string; page?: string; size?: string; pos?: string; filters?: string; docpage?: string }>
 }) {
   const { id } = await params
   const resolvedSearchParams = await searchParams
@@ -151,6 +196,10 @@ export default async function ItemPage({
   const manifestUrl = `${siteUrl}/api/iiif/3/${id}/manifest`
   const hasImages = item.has_image
 
+  // OCR pages (text + line bboxes) for the in-viewer 本文検索 / highlight.
+  const omekaId = raw?.omeka_id as string | number | undefined
+  const ocrPages = hasImages && omekaId != null ? await getOcrPages(omekaId) : []
+
   const pageUrl = `${siteUrl}/${locale}/item/${id}`
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {
     year: 'numeric',
@@ -174,10 +223,13 @@ export default async function ItemPage({
   return (
     <div>
       <Common title={title} breadcrumbs={breadcrumbs}>
-        {/* IIIF Viewer */}
+        {/* IIIF Viewer (OpenSeadragon) — opens at the matched page and
+            highlights the search term in-image when arriving from full-text search. */}
         {hasImages && (
           <ItemViewer
-            manifestUrl={manifestUrl}
+            itemId={id}
+            ocrPages={ocrPages}
+            initialPage={resolvedSearchParams.docpage ? Number(resolvedSearchParams.docpage) : undefined}
             searchQuery={resolvedSearchParams.q}
           />
         )}
@@ -218,8 +270,8 @@ export default async function ItemPage({
         />
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          <div className="px-6 py-4 bg-surface-sunken border-b border-brand">
+            <h2 className="text-lg font-bold text-ink">
               {t('bibliographicInfo')}
             </h2>
           </div>
@@ -387,7 +439,7 @@ export default async function ItemPage({
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {t('classification')}
                 </dt>
-                <dd className="mt-1 text-sm text-green-600 dark:text-green-400 sm:col-span-3 sm:mt-0">
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {item.tag1}
                 </dd>
               </div>
@@ -399,7 +451,7 @@ export default async function ItemPage({
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {t('subClassification')}
                 </dt>
-                <dd className="mt-1 text-sm text-green-600 dark:text-green-400 sm:col-span-3 sm:mt-0">
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
                   {[item.tag2, item.tag3].filter(Boolean).join(' > ')}
                 </dd>
               </div>
@@ -429,7 +481,7 @@ export default async function ItemPage({
                       href={item.isPartOf}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                      className="text-brand hover:text-brand-strong underline"
                     >
                       {item.isPartOf}
                     </a>
@@ -452,7 +504,7 @@ export default async function ItemPage({
                       href={item.references}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white underline"
+                      className="text-brand hover:text-brand-strong underline"
                     >
                       {item.references}
                     </a>
@@ -476,7 +528,7 @@ export default async function ItemPage({
         <div className="mt-6 text-center">
           <Link
             href={searchHref}
-            className="inline-flex items-center text-sm text-gray-900 hover:text-black dark:text-gray-200 dark:hover:text-white"
+            className="inline-flex items-center text-sm text-brand hover:text-brand-strong"
           >
             <svg className="mr-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
