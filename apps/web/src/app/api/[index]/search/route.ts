@@ -1,6 +1,20 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { highlightFields } from '@/config/search'
 
 export const runtime = 'nodejs'
+
+// On Cloudflare Workers (OpenNext), vars/secrets are request-scoped in
+// getCloudflareContext().env and are NOT reliably mirrored into process.env
+// inside route handlers. Read through here (falls back to process.env locally).
+function readEnv(key: string): string {
+  try {
+    const v = (getCloudflareContext().env as Record<string, unknown>)[key]
+    if (typeof v === 'string' && v) return v
+  } catch {
+    // not in the cloudflare runtime (local dev / build)
+  }
+  return process.env[key] || ''
+}
 
 type Filter = {
   field: string
@@ -26,8 +40,8 @@ type State = {
 function createHeaders() {
   return {
     'Content-Type': 'application/json',
-    'CF-Access-Client-Id': process.env.CF_ACCESS_CLIENT_ID || '',
-    'CF-Access-Client-Secret': process.env.CF_ACCESS_CLIENT_SECRET || '',
+    'CF-Access-Client-Id': readEnv('CF_ACCESS_CLIENT_ID'),
+    'CF-Access-Client-Secret': readEnv('CF_ACCESS_CLIENT_SECRET'),
   }
 }
 
@@ -277,12 +291,12 @@ export async function POST(
 ) {
   const body = await request.json()
   const { index } = await params
-  const host = process.env.ES_URL || ''
+  const host = readEnv('ES_URL')
   const state = body.state || body.requestState
   const queryConfig = body.queryConfig
 
   // Validate index
-  const allowedIndices = (process.env.ALLOWED_INDICES || 'morrison_bib').split(',').map(s => s.trim())
+  const allowedIndices = (readEnv('ALLOWED_INDICES') || 'morrison_bib').split(',').map(s => s.trim())
   if (!allowedIndices.includes(index)) {
     return new Response(
       JSON.stringify({ error: 'Index not allowed' }),
