@@ -11,6 +11,7 @@ const config = [
       '*.config.js',
       '*.config.ts',
       'scripts/**',
+      'public/swagger-ui/**',
     ],
   },
   ...next,

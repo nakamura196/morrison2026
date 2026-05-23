@@ -159,6 +159,10 @@
   "AboutPage": {
     "title": "モリソンパンフレット・データベースによせて"
   },
+  "ApiDocsPage": {
+    "title": "API ドキュメント",
+    "description": "本データベースが提供する API の一覧です。各エンドポイントの仕様は OpenAPI 3.1 で記述され、/api/openapi.json から取得できます。"
+  },
   "FulltextSearchPage": {
     "title": "全文検索",
     "description": "モリソンパンフレットのOCRテキストをページ単位で全文検索します。検索語句を入力すると、該当するページのテキストがハイライト表示されます。",

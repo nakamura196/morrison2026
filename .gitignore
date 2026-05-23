@@ -15,6 +15,9 @@ node_modules/
 .next/
 out/
 
+# self-hosted Swagger UI assets (copied from swagger-ui-dist at build time)
+apps/web/public/swagger-ui/
+
 # cloudflare / opennext
 .open-next/
 .wrangler/

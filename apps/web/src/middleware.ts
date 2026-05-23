@@ -15,6 +15,9 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all paths except static files, API routes, and error pages
-    '/((?!_next|_error|404|500|favicon.ico|apple-icon.png|icon.svg|manifest.json|sitemap.xml|robots.txt|api|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp|.*\\.svg|.*\\.css|.*\\.html).*)',
+    // NOTE: exclude `api/` (with the slash) — a bare `api` here also matches
+    // page routes that merely start with "api" (e.g. /api-docs), which would
+    // skip the locale middleware and render them as `[locale]=api-docs`.
+    '/((?!_next|_error|404|500|favicon.ico|apple-icon.png|icon.svg|manifest.json|sitemap.xml|robots.txt|api/|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp|.*\\.svg|.*\\.css|.*\\.js|.*\\.html).*)',
   ],
 };

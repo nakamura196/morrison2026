@@ -159,6 +159,10 @@
   "AboutPage": {
     "title": "On the Morrison Pamphlets Database"
   },
+  "ApiDocsPage": {
+    "title": "API Documentation",
+    "description": "A list of the APIs this database exposes. Each endpoint is described in OpenAPI 3.1 and is available at /api/openapi.json."
+  },
   "FulltextSearchPage": {
     "title": "Fulltext Search",
     "description": "Search through OCR text of Morrison Pamphlets at page level. Enter a search term to find pages with highlighted matching text.",

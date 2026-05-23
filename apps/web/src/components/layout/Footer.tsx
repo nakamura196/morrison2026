@@ -17,6 +17,7 @@ export default function Footer() {
     search: locale === 'en' ? 'Search' : '検索',
     searchLink: locale === 'en' ? 'Search' : '検索',
     fulltextSearch: locale === 'en' ? 'Fulltext Search' : '全文検索',
+    apiDocs: locale === 'en' ? 'API Documentation' : 'API ドキュメント',
     relatedLinks: locale === 'en' ? 'Related Links' : '関連リンク',
     copyright: locale === 'en' ? 'Toyo Bunko' : '東洋文庫',
   }
@@ -58,6 +59,14 @@ export default function Footer() {
                   className="text-sm text-ink-muted hover:text-brand transition-colors"
                 >
                   {labels.news}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/api-docs"
+                  className="text-sm text-ink-muted hover:text-brand transition-colors"
+                >
+                  {labels.apiDocs}
                 </Link>
               </li>
             </ul>

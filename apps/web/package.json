@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "gen:content": "node scripts/gen-content.mjs",
-    "predev": "node scripts/gen-content.mjs",
+    "gen:openapi": "tsx scripts/gen-openapi.mjs",
+    "copy:swagger-ui": "node scripts/copy-swagger-ui.mjs",
+    "predev": "node scripts/gen-content.mjs && node scripts/copy-swagger-ui.mjs",
     "dev": "next dev --turbo -p 3106",
-    "prebuild": "node scripts/gen-content.mjs",
+    "prebuild": "node scripts/gen-content.mjs && node scripts/copy-swagger-ui.mjs",
     "build": "next build",
     "build:cloudflare": "npx @opennextjs/cloudflare build",
     "start": "next start",
@@ -45,6 +47,7 @@
     "dotenv": "^16.5.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.0.1",
+    "swagger-ui-dist": "5.32.6",
     "tsx": "^4.19.0",
     "typescript": "5.8.3",
     "wrangler": "^4.86.0"
