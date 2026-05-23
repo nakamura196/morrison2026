@@ -24,6 +24,62 @@ const OMEKA_USER = process.env.OMEKA_USER || ''
 const OMEKA_PASSWORD = process.env.OMEKA_PASSWORD || ''
 const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
+// Clean PTIF served from s3ds via Cantaloupe (media.toyobunko-lab.jp). The
+// migration target: identifier `morrison_p/<group>/<callNumber>/<NNNN>.tif`
+// (PATH_PREFIX=files/ on the server). This is the preferred image source.
+const MEDIA_BASE = (process.env.MORRISON_MEDIA_IIIF_BASE || 'https://media.toyobunko-lab.jp/iiif/3').replace(/\/+$/, '')
+
+// Legacy live Cantaloupe (Azure-backed). Full coverage during migration;
+// used as fallback for items not yet converted to clean PTIF.
+const MO_IMG_BASE = (process.env.MORRISON_IIIF_BASE || 'https://mo-img.aws.ldas.jp/iiif/3').replace(/\/+$/, '')
+
+/**
+ * Group folder = the first two hyphen-segments of the callNumber
+ * (`P-III-a-0083` → `P-III`). Mirrors the s3ds clean key layout
+ * `files/morrison_p/<group>/<callNumber>/<NNNN>.tif`.
+ */
+function deriveGroup(callNumber: string): string {
+  return callNumber.split('-').slice(0, 2).join('-')
+}
+
+/**
+ * Page number from a media `o:source` filename (`..._0001.jpg` → 1). The clean
+ * PTIF keys preserve this source page number (zero-padded to 4), so it — not
+ * the media list index — is what addresses a page on media.
+ */
+function pageFromSource(source: string): number | null {
+  const m = decodeURIComponent(source).match(/_(\d+)\.(?:jpe?g|tiff?)/i)
+  return m ? parseInt(m[1], 10) : null
+}
+
+/** media. (clean PTIF) IIIF service URL. Page is zero-padded to 4 digits. */
+function mediaServiceUrl(group: string, callNumber: string, page: number): string {
+  const ident = `morrison_p/${group}/${callNumber}/${String(page).padStart(4, '0')}.tif`
+  return `${MEDIA_BASE}/${encodeURIComponent(ident)}`
+}
+
+/**
+ * Legacy mo-img service URL. `pad` is the zero-pad width (4 or 3 in legacy
+ * folders); identifier `<group>/<callNumber>/<callNumber>_<NNNN>.jpg`.
+ */
+function moImgServiceUrl(group: string, callNumber: string, page: number, pad: number): string {
+  const ident = `${group}/${callNumber}/${callNumber}_${String(page).padStart(pad, '0')}.jpg`
+  return `${MO_IMG_BASE}/${encodeURIComponent(ident)}`
+}
+
+/** Fetch a Cantaloupe info.json; returns dims when it exists, else null. */
+async function probeIIIF(serviceUrl: string): Promise<{ width: number; height: number } | null> {
+  try {
+    const res = await fetch(`${serviceUrl}/info.json`, { next: { revalidate: 86400 } })
+    if (!res.ok) return null
+    const info = (await res.json()) as { width?: number; height?: number }
+    if (!info?.width || !info?.height) return null
+    return { width: info.width, height: info.height }
+  } catch {
+    return null
+  }
+}
+
 interface OmekaMedia {
   'o:id': number
   'o:media_type'?: string
@@ -112,14 +168,57 @@ export async function GET(
     })
   }
 
-  // Fetch dimensions from IIIF Image API info.json for media that lack local dimensions
+  // Image source resolution (migration in progress):
+  //   1. media.toyobunko-lab.jp — clean PTIF on s3ds (preferred, real tiles)
+  //   2. mo-img.aws.ldas.jp     — legacy Cantaloupe (Azure), full coverage
+  //   3. Omeka static JPEG       — last resort (no IIIF service → no tiling)
+  // Probe page 1 of each source to gate per-page resolution. The clean PTIF
+  // page = the source filename's page number (preserved on conversion).
+  const callNumber = (item.callNumber as string) || id
+  const group = deriveGroup(callNumber)
+
+  const firstPage = pageFromSource(imageMedia[0]?.['o:source'] || '') ?? 1
+  const mediaFirstDims = await probeIIIF(mediaServiceUrl(group, callNumber, firstPage))
+  const useMedia = mediaFirstDims !== null
+
+  let moImgPad: number | null = null
+  let moImgFirstDims: { width: number; height: number } | null = null
+  if (!useMedia) {
+    for (const pad of [4, 3]) {
+      const dims = await probeIIIF(moImgServiceUrl(group, callNumber, 1, pad))
+      if (dims) {
+        moImgPad = pad
+        moImgFirstDims = dims
+        break
+      }
+    }
+  }
+
   const canvases: IIIFCanvasImage[] = await Promise.all(
-    imageMedia.map(async (media) => {
+    imageMedia.map(async (media, idx) => {
       const source = media['o:source'] || ''
+
+      // 1. Clean PTIF via media. (s3ds).
+      if (useMedia) {
+        const page = pageFromSource(source) ?? idx + 1
+        const serviceUrl = mediaServiceUrl(group, callNumber, page)
+        const dims =
+          (idx === 0 ? mediaFirstDims : await probeIIIF(serviceUrl)) ||
+          media.data?.dimensions?.original || { width: 1000, height: 1000 }
+        return {
+          imageUrl: `${serviceUrl}/full/max/0/default.jpg`,
+          serviceUrl,
+          width: dims.width,
+          height: dims.height,
+          format: 'image/jpeg',
+          thumbnailUrl: `${serviceUrl}/full/!200,200/0/default.jpg`,
+        }
+      }
+
       const isIIIF = source.includes('/iiif/')
 
+      // 2a. Media already exposed as an IIIF Image API source (mo-img).
       if (isIIIF) {
-        // IIIF Image API: source is info.json URL
         const serviceUrl = source.replace('/info.json', '')
         let width = 1000
         let height = 1000
@@ -143,16 +242,32 @@ export async function GET(
           format: 'image/jpeg',
           thumbnailUrl: media.thumbnail_display_urls?.medium || `${serviceUrl}/full/!200,200/0/default.jpg`,
         }
-      } else {
-        // Static image from Omeka S
-        const dims = media.data?.dimensions?.original || { width: 1000, height: 1000 }
-        return {
-          imageUrl: media['o:original_url'] || '',
-          width: dims.width,
-          height: dims.height,
-          format: 'image/jpeg',
-          thumbnailUrl: media.thumbnail_display_urls?.medium || '',
+      }
+
+      // 2b. Static media resolvable on the legacy mo-img Cantaloupe.
+      if (moImgPad !== null) {
+        const serviceUrl = moImgServiceUrl(group, callNumber, idx + 1, moImgPad)
+        const dims = idx === 0 ? moImgFirstDims : await probeIIIF(serviceUrl)
+        if (dims) {
+          return {
+            imageUrl: `${serviceUrl}/full/max/0/default.jpg`,
+            serviceUrl,
+            width: dims.width,
+            height: dims.height,
+            format: 'image/jpeg',
+            thumbnailUrl: media.thumbnail_display_urls?.medium || `${serviceUrl}/full/!200,200/0/default.jpg`,
+          }
         }
+      }
+
+      // 3. Omeka static JPEG (no IIIF service → no tiling).
+      const dims = media.data?.dimensions?.original || { width: 1000, height: 1000 }
+      return {
+        imageUrl: media['o:original_url'] || '',
+        width: dims.width,
+        height: dims.height,
+        format: 'image/jpeg',
+        thumbnailUrl: media.thumbnail_display_urls?.medium || '',
       }
     }),
   )
