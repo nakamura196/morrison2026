@@ -69,17 +69,15 @@ export default function ItemShareExport({
   const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${encodedUrl}`
 
   const btnBase =
-    'inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
+    'inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-line text-ink hover:bg-surface-sunken transition-colors'
 
   return (
     <section
       aria-label={labels.heading}
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+      className="bg-surface-raised rounded-lg shadow-sm border border-line overflow-hidden"
     >
-      <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
-          {labels.heading}
-        </h2>
+      <div className="px-6 py-4 bg-surface-sunken border-b border-brand">
+        <h2 className="text-lg font-bold text-ink">{labels.heading}</h2>
       </div>
 
       <div className="px-6 py-4 flex flex-col gap-5">
@@ -87,11 +85,11 @@ export default function ItemShareExport({
             export (JSON / IIIF) last, since those are unfamiliar to most
             visitors. */}
         <div>
-          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <h3 className="text-xs font-medium text-ink-muted mb-2">
             {labels.citationGroup}
           </h3>
           <div className="flex items-start gap-2">
-            <p className="flex-1 text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2">
+            <p className="flex-1 text-xs text-ink-muted leading-relaxed bg-surface-sunken border border-line rounded-md px-3 py-2">
               {citation}
             </p>
             <button
@@ -111,7 +109,7 @@ export default function ItemShareExport({
         </div>
 
         <div>
-          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <h3 className="text-xs font-medium text-ink-muted mb-2">
             {labels.shareGroup}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -162,7 +160,7 @@ export default function ItemShareExport({
         </div>
 
         <div>
-          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <h3 className="text-xs font-medium text-ink-muted mb-2">
             {labels.exportGroup}
           </h3>
           <div className="flex flex-wrap gap-2">

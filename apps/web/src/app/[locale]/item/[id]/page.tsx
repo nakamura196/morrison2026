@@ -47,40 +47,37 @@ const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; r
   }
 })
 
-// OCR text + line bboxes for every page of an item (keyed by omeka_id =
-// the morrison OCR index's item_id). `coords` is written by
-// scripts/index-ocr-coords.py; absent until that batch runs (viewer degrades
-// to text-only in-page search).
+// Page-level OCR *text* for every page of an item (keyed by omeka_id = the
+// morrison OCR index's item_id). Text alone powers cross-page in-viewer search
+// and the page list. The heavy per-line bounding boxes are deliberately NOT
+// fetched here — the viewer lazy-loads the active page's boxes from the IIIF
+// annotation endpoint (/api/iiif/3/:id/annotations/p:n), so opening an item no
+// longer serializes every page's coordinates into the initial HTML.
 const getOcrPages = cache(async (omekaId: string | number): Promise<OcrPage[]> => {
   ensureEnv()
   const ocrIndex = process.env.FULLTEXT_INDEX_NAME || 'morrison'
   try {
     const data = await esSearch(ocrIndex, {
       size: 2000,
-      _source: ['page', 'text', 'coords'],
+      _source: ['page', 'text'],
       query: { term: { item_id: String(omekaId) } },
     })
     const hits = (data.hits?.hits || []) as Array<{
-      _source: {
-        page?: string | number
-        text?: string
-        coords?: { w?: number; h?: number; lines?: { t: string; x: number; y: number; w: number; h: number }[] }
-      }
+      _source: { page?: string | number; text?: string }
     }>
-    return hits.map((h) => {
-      const s = h._source
-      const c = s.coords
-      return {
-        page: Number(s.page),
-        text: s.text ?? null,
-        w: c?.w ?? null,
-        h: c?.h ?? null,
-        // map the stored {t,x,y,w,h} shape onto the viewer's {text,x,y,w,h}
-        lines: Array.isArray(c?.lines)
-          ? c!.lines.map((l) => ({ text: l.t, x: l.x, y: l.y, w: l.w, h: l.h }))
-          : null,
-      }
-    })
+    // The OCR index can hold more than one doc per page (separate text / bbox
+    // passes merged over time); keep the longest text per page number.
+    const byPage = new Map<number, string>()
+    for (const h of hits) {
+      const page = Number(h._source.page)
+      if (!Number.isFinite(page) || page < 1) continue
+      const text = h._source.text ?? ''
+      const prev = byPage.get(page)
+      if (prev === undefined || text.length > prev.length) byPage.set(page, text)
+    }
+    return Array.from(byPage.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([page, text]) => ({ page, text }))
   } catch (error) {
     console.error('Failed to fetch OCR pages:', error)
     return []
@@ -276,7 +273,7 @@ export default async function ItemPage({
             share / export / citation panel on the right. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         {/* Left: bibliographic info */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="lg:col-span-2 bg-surface-raised rounded-lg shadow-sm border border-line overflow-hidden">
           <div className="px-6 py-4 bg-surface-sunken border-b border-brand">
             <h2 className="text-lg font-bold text-ink">
               {t('bibliographicInfo')}

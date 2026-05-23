@@ -158,6 +158,35 @@ async function fetchServiceIds(itemId: string): Promise<string[]> {
   }
 }
 
+/**
+ * Lazy-load one page's OCR line boxes from the IIIF Presentation 3 annotation
+ * page (the text layer at /api/iiif/3/:id/annotations/p:n). Only the active
+ * page's boxes are fetched on demand, so the initial payload no longer carries
+ * every page's coordinates. Line annotations target `canvas#xywh=x,y,w,h` in
+ * image-pixel space (= the OCR coord space), so they map 1:1 onto the OSD source
+ * image with no scaling. Whole-page text annotations (no `#xywh`) are skipped —
+ * page text for search arrives separately via `ocrPages`.
+ */
+async function fetchPageCoords(itemId: string, page: number): Promise<OcrLine[]> {
+  try {
+    const res = await fetch(`/api/iiif/3/${encodeURIComponent(itemId)}/annotations/p${page}`)
+    if (!res.ok) return []
+    const ap = (await res.json()) as {
+      items?: { body?: { value?: string }; target?: unknown }[]
+    }
+    const out: OcrLine[] = []
+    for (const it of ap.items ?? []) {
+      const target = typeof it.target === 'string' ? it.target : ''
+      const m = /#xywh=(\d+),(\d+),(\d+),(\d+)/.exec(target)
+      if (!m) continue
+      out.push({ text: it.body?.value ?? '', x: +m[1], y: +m[2], w: +m[3], h: +m[4] })
+    }
+    return out
+  } catch {
+    return []
+  }
+}
+
 export default function BookViewer({
   itemId,
   ocrPages,
@@ -186,6 +215,13 @@ export default function BookViewer({
     }
   }, [itemId])
 
+  // Per-page OCR line boxes, fetched lazily for the active page (see the effect
+  // below). The initial payload carries page text for cross-page search but not
+  // the heavy per-line coordinates — those load on demand from the annotation
+  // endpoint when a page is opened.
+  const [coordsByPage, setCoordsByPage] = useState<Map<number, OcrLine[]>>(new Map())
+  const coordsLoading = useRef<Set<number>>(new Set())
+
   const ocrByPage = useMemo(() => {
     const map = new Map<number, OcrPage>()
     for (const p of ocrPages) map.set(Number(p.page), p)
@@ -206,10 +242,12 @@ export default function BookViewer({
         image_width: ocr?.w ?? null,
         image_height: ocr?.h ?? null,
         ocr_text: ocr?.text ?? null,
-        lines: ocr?.lines ?? null,
+        // Lazily-loaded boxes take precedence; until the active page's coords
+        // arrive, `lines` is null and search/overlay fall back to page text.
+        lines: coordsByPage.get(pageNumber) ?? ocr?.lines ?? null,
       }
     })
-  }, [serviceIds, ocrByPage])
+  }, [serviceIds, ocrByPage, coordsByPage])
 
   const [activeQuery, setActiveQuery] = useState<string>(query ?? '')
   const [draft, setDraft] = useState<string>(query ?? '')
@@ -273,6 +311,27 @@ export default function BookViewer({
     () => pages.findIndex((p) => p.page_id === (active?.page_id ?? activeId)),
     [pages, active, activeId],
   )
+
+  // Fetch the active page's OCR line boxes on demand, once per page. Pages stay
+  // text-only until visited, so opening an item only pays for one page's coords
+  // instead of every page's up front.
+  const activePageNumber = active?.page_number
+  useEffect(() => {
+    if (activePageNumber == null || !hasOcr) return
+    if (coordsByPage.has(activePageNumber) || coordsLoading.current.has(activePageNumber)) return
+    coordsLoading.current.add(activePageNumber)
+    let cancelled = false
+    fetchPageCoords(itemId, activePageNumber)
+      .then((lines) => {
+        if (!cancelled) setCoordsByPage((prev) => new Map(prev).set(activePageNumber, lines))
+      })
+      .finally(() => {
+        coordsLoading.current.delete(activePageNumber)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activePageNumber, itemId, hasOcr, coordsByPage])
 
   const submitQuery = (next: string) => {
     const trimmed = next.trim()
