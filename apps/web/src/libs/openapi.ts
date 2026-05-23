@@ -30,6 +30,14 @@ export const openApiDocument = {
   tags: [
     { name: 'search', description: 'OpenSearch ベースの検索 API' },
     { name: 'iiif', description: 'IIIF Presentation / Content Search API' },
+    {
+      name: 'dts',
+      description:
+        'DTS (Distributed Text Services) 1.0 API。TEI コーパスを標準仕様で公開する。' +
+        'Collection / Navigation は ES (morrison_bib / morrison)、Document の全文書 TEI は ' +
+        'S3 の正本 (SigV2 署名 GET、NER・座標入り) を返す。S3 鍵未設定/対象未アップロード時は ' +
+        'ES 本文から TEI を生成してフォールバック。仕様: https://dtsapi.org/specifications/versions/v1.0/',
+    },
     { name: 'meta', description: 'API メタ情報' },
   ],
   paths: {
@@ -199,6 +207,151 @@ export const openApiDocument = {
       },
     },
 
+    '/api/dts': {
+      get: {
+        tags: ['dts'],
+        summary: 'DTS Entry endpoint',
+        description:
+          'DTS 1.0 のエントリポイント。Collection / Navigation / Document 各エンドポイントへの ' +
+          'URI テンプレートを返す (`application/ld+json`)。',
+        operationId: 'dtsEntry',
+        responses: {
+          '200': {
+            description: 'DTS EntryPoint (JSON-LD)',
+            content: { 'application/ld+json': { schema: { type: 'object', additionalProperties: true } } },
+          },
+        },
+      },
+    },
+
+    '/api/dts/collection': {
+      get: {
+        tags: ['dts'],
+        summary: 'DTS Collection endpoint',
+        description:
+          '3 階層のコレクションを返す: ルート (id 省略) → 請求記号グループ (例 `P-III`) → ' +
+          '資料 Resource (callNumber)。グループは callNumber から導出。資料一覧は `page` で' +
+          'ページング。`nav=parents` で親を返す。',
+        operationId: 'dtsCollection',
+        parameters: [
+          {
+            name: 'id',
+            in: 'query',
+            required: false,
+            description: 'コレクション/リソース識別子。省略時はルート。グループ (`P-III`) か callNumber (`P-III-a-0083`)。',
+            schema: { type: 'string', example: 'P-III' },
+          },
+          {
+            name: 'page',
+            in: 'query',
+            required: false,
+            description: 'グループ内資料一覧のページ番号 (1 始まり、100 件/ページ)。',
+            schema: { type: 'integer', minimum: 1, default: 1 },
+          },
+          {
+            name: 'nav',
+            in: 'query',
+            required: false,
+            description: '`children` (既定) で子、`parents` で親を列挙。',
+            schema: { type: 'string', enum: ['children', 'parents'], default: 'children' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'DTS Collection / Resource (JSON-LD)',
+            content: { 'application/ld+json': { schema: { type: 'object', additionalProperties: true } } },
+          },
+          '400': { description: '不正なパラメータ', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+          '404': { description: 'コレクション/リソースが見つからない', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+        },
+      },
+    },
+
+    '/api/dts/navigation': {
+      get: {
+        tags: ['dts'],
+        summary: 'DTS Navigation endpoint',
+        description:
+          '資料内の引用可能単位 (CitableUnit) を返す。本コーパスはページ画像資料のため、' +
+          '引用階層は `page` の 1 レベルのみ。ページ数は `morrison_bib.page_count`。' +
+          '`ref` で単一ページ、`start`+`end` で範囲を指定。',
+        operationId: 'dtsNavigation',
+        parameters: [
+          { $ref: '#/components/parameters/DtsResourceParam' },
+          { $ref: '#/components/parameters/DtsRefParam' },
+          { $ref: '#/components/parameters/DtsStartParam' },
+          { $ref: '#/components/parameters/DtsEndParam' },
+          {
+            name: 'down',
+            in: 'query',
+            required: false,
+            description: '取得する引用階層の深さ (フラット構成のため実質 1)。',
+            schema: { type: 'integer' },
+          },
+          {
+            name: 'page',
+            in: 'query',
+            required: false,
+            description: 'member 一覧のページ番号 (500 単位/ページ)。',
+            schema: { type: 'integer', minimum: 1, default: 1 },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'DTS Navigation (JSON-LD)',
+            content: { 'application/ld+json': { schema: { type: 'object', additionalProperties: true } } },
+          },
+          '400': { description: '不正なパラメータ', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+          '404': { description: 'リソース/参照が見つからない', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+        },
+      },
+    },
+
+    '/api/dts/document': {
+      get: {
+        tags: ['dts'],
+        summary: 'DTS Document endpoint (TEI ダウンロード)',
+        description:
+          '資料の TEI を返す。全文書: S3 の正本 TEI (SigV2 署名 GET、NER・座標入り) を返し、' +
+          'S3 鍵未設定/対象未アップロード時は ES のページ本文から TEI を生成してフォールバック。' +
+          '断片 (`ref` または `start`+`end`): ES のページ本文を `<dts:wrapper>` で包んで返す。' +
+          '`mediaType` で `application/tei+xml` (既定) / `text/plain`。' +
+          'ブラウザでインライン表示したい場合は `application/xml` / `text/xml` (同じ TEI 本文、' +
+          'ダウンロードされず表示される)。',
+        operationId: 'dtsDocument',
+        parameters: [
+          { $ref: '#/components/parameters/DtsResourceParam' },
+          { $ref: '#/components/parameters/DtsRefParam' },
+          { $ref: '#/components/parameters/DtsStartParam' },
+          { $ref: '#/components/parameters/DtsEndParam' },
+          {
+            name: 'mediaType',
+            in: 'query',
+            required: false,
+            description: 'レスポンス形式。`application/xml` / `text/xml` はブラウザ表示用の別名。',
+            schema: {
+              type: 'string',
+              enum: ['application/tei+xml', 'application/xml', 'text/xml', 'text/plain'],
+              default: 'application/tei+xml',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'TEI ドキュメント (全文書) または断片 (`<dts:wrapper>`)',
+            content: {
+              'application/tei+xml': { schema: { type: 'string' } },
+              'application/xml': { schema: { type: 'string' } },
+              'text/xml': { schema: { type: 'string' } },
+              'text/plain': { schema: { type: 'string' } },
+            },
+          },
+          '400': { description: '不正なパラメータ / 未対応 mediaType', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+          '404': { description: 'リソースが見つからない / 本文が無い / 範囲外', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+        },
+      },
+    },
+
     '/api/openapi.json': {
       get: {
         tags: ['meta'],
@@ -237,6 +390,34 @@ export const openApiDocument = {
         description: '資料の請求記号 (callNumber)',
         schema: { type: 'string', example: 'P-III-a-3247' },
       },
+      DtsResourceParam: {
+        name: 'resource',
+        in: 'query',
+        required: true,
+        description: '資料の識別子 (callNumber)。',
+        schema: { type: 'string', example: 'P-III-a-0083' },
+      },
+      DtsRefParam: {
+        name: 'ref',
+        in: 'query',
+        required: false,
+        description: '単一の引用参照 (ページ番号)。`start`/`end` とは併用不可。',
+        schema: { type: 'string', example: '3' },
+      },
+      DtsStartParam: {
+        name: 'start',
+        in: 'query',
+        required: false,
+        description: '範囲の開始ページ。`end` と必ず併用。',
+        schema: { type: 'string', example: '2' },
+      },
+      DtsEndParam: {
+        name: 'end',
+        in: 'query',
+        required: false,
+        description: '範囲の終了ページ。`start` と必ず併用。',
+        schema: { type: 'string', example: '4' },
+      },
     },
     schemas: {
       Error: {
@@ -246,6 +427,19 @@ export const openApiDocument = {
           details: { type: 'string' },
         },
         required: ['error'],
+      },
+      DtsError: {
+        type: 'object',
+        description: 'DTS のエラー応答 (RFC 7807 風、`application/problem+json`)。',
+        properties: {
+          '@context': { type: 'string', example: 'https://dtsapi.org/context/v1.0.json' },
+          dtsVersion: { type: 'string', example: '1.0' },
+          '@type': { type: 'string', example: 'Error' },
+          title: { type: 'string' },
+          status: { type: 'integer', example: 404 },
+          detail: { type: 'string' },
+        },
+        required: ['@type', 'title', 'status'],
       },
       SearchFilter: {
         type: 'object',
