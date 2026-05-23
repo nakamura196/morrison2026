@@ -33,7 +33,7 @@ const ebGaramond = EB_Garamond({
 import ThemeProvider from '@/theme/theme-provider'
 import { Suspense } from 'react'
 import { getDefaultMetadata } from '@/libs/metadata'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 export async function generateMetadata({
   params,
@@ -42,6 +42,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   return await getDefaultMetadata(locale)
+}
+
+// Tints the mobile browser chrome to match the page surface in each scheme.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f0ed' },
+    { media: '(prefers-color-scheme: dark)', color: '#1c1a18' },
+  ],
 }
 
 export default async function RootLayout({

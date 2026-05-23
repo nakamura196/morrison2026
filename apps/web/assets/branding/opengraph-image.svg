@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Social share card (1200x630). Source for opengraph-image.png /
+       twitter-image.png. Japanese set in BIZ UDMincho (brand Mincho).
+       Regenerate with scripts/branding/build-icons.zsh. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#5f1216"/>
+      <stop offset="0.55" stop-color="#4c1013"/>
+      <stop offset="1" stop-color="#2d090b"/>
+    </linearGradient>
+    <linearGradient id="chip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8c2a2f"/>
+      <stop offset="1" stop-color="#76161b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- double-rule frame -->
+  <rect x="34" y="34" width="1132" height="562" rx="18" fill="none"
+        stroke="#f5f0ed" stroke-opacity="0.30" stroke-width="2"/>
+  <rect x="44" y="44" width="1112" height="542" rx="12" fill="none"
+        stroke="#f5f0ed" stroke-opacity="0.16" stroke-width="1"/>
+
+  <!-- M monogram chip -->
+  <rect x="542" y="80" width="116" height="116" rx="26" fill="url(#chip)"
+        stroke="#f5f0ed" stroke-opacity="0.40" stroke-width="2"/>
+  <text x="600" y="142" text-anchor="middle" dominant-baseline="central"
+        font-family="'EB Garamond','Georgia','Times New Roman',serif"
+        font-weight="700" font-size="78" fill="#f5f0ed">M</text>
+
+  <!-- title (two lines) -->
+  <g font-family="'BIZ UDPMincho','BIZ UDMincho','Hiragino Mincho ProN',serif"
+     font-weight="700" fill="#fbf2f2" text-anchor="middle">
+    <text x="600" y="318" font-size="92" letter-spacing="2">モリソンパンフレット</text>
+    <text x="600" y="430" font-size="92" letter-spacing="2">統合データベース</text>
+  </g>
+
+  <!-- divider -->
+  <line x1="520" y1="474" x2="680" y2="474" stroke="#f5f0ed" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- subtitle -->
+  <text x="600" y="522" text-anchor="middle"
+        font-family="'BIZ UDPGothic','BIZ UDGothic','Hiragino Sans',sans-serif"
+        font-size="30" fill="#f5f0ed" fill-opacity="0.84">G.E.モリソン蒐集「モリソンパンフレット」デジタルアーカイブ</text>
+
+  <!-- footer -->
+  <text x="600" y="572" text-anchor="middle"
+        font-family="'BIZ UDPMincho','BIZ UDMincho','Hiragino Mincho ProN',serif"
+        font-size="25" fill="#f5f0ed" fill-opacity="0.62" letter-spacing="3">東洋文庫　THE TOYO BUNKO　·　morrison.toyobunko-lab.jp</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="モリソンパンフレット統合データベース">
+  <!-- Full-bleed variant for iOS home screen (Apple masks its own rounded
+       corners, so the background must reach the edges — no transparency). -->
+  <defs>
+    <linearGradient id="enji" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8c2a2f"/>
+      <stop offset="1" stop-color="#76161b"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" fill="url(#enji)"/>
+  <rect x="40" y="40" width="432" height="432" rx="64" ry="64" fill="none"
+        stroke="#f5f0ed" stroke-opacity="0.34" stroke-width="9"/>
+  <text x="256" y="262" text-anchor="middle" dominant-baseline="central"
+        font-family="'EB Garamond','Georgia','Times New Roman',serif"
+        font-weight="700" font-size="332" fill="#f5f0ed">M</text>
+</svg>
