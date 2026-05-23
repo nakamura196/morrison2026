@@ -66,7 +66,12 @@ const indexMapping = {
       tag3: { type: 'keyword' },
       holding: { type: 'keyword' },
       references: { type: 'keyword' },
+      // has_image / page_count は rebuild 時点では Omeka の thumbnail 由来 (陳腐化しうる)。
+      // 正本はメディア台帳 data/media.csv なので、rebuild 後は必ず
+      //     python3 scripts/recompute-has-image.py --apply
+      // を実行して media 台帳から再計算・書き戻す (page_count も同時付与)。
       has_image: { type: 'boolean' },
+      page_count: { type: 'integer' },
       publication_year: { type: 'keyword' },
       language: { type: 'keyword' },
       thumbnail_urls: { type: 'object', enabled: false },
