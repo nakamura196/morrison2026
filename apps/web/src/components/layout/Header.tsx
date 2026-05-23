@@ -4,7 +4,7 @@ import { useState } from 'react'
 import configJa from '@/config.json'
 import configEn from '@/config.en.json'
 import ThemeToggle from '../../theme/theme-toggle'
-import { HiSearch, HiMenu, HiX, HiExternalLink, HiDocumentText, HiInformationCircle, HiBell } from 'react-icons/hi'
+import { HiSearch, HiMenu, HiX, HiDocumentText, HiInformationCircle } from 'react-icons/hi'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { ToggleLanguage } from './toggle-language'
@@ -51,25 +51,6 @@ export default function Header() {
               <HiInformationCircle className="w-5 h-5" />
               <span>{t('about')}</span>
             </Link>
-            <Link
-              href="/news"
-              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
-            >
-              <HiBell className="w-5 h-5" />
-              <span>{t('news')}</span>
-            </Link>
-            {config.links?.map((link, index) => (
-              <a
-                key={index}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
-              >
-                <span>{locale === 'en' ? link.title_en : link.title}</span>
-                <HiExternalLink className="w-4 h-4" />
-              </a>
-            ))}
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <ToggleLanguage />
@@ -123,27 +104,6 @@ export default function Header() {
               <HiInformationCircle className="w-5 h-5" />
               <span>{t('about')}</span>
             </Link>
-            <Link
-              href="/news"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <HiBell className="w-5 h-5" />
-              <span>{t('news')}</span>
-            </Link>
-            {config.links?.map((link, index) => (
-              <a
-                key={index}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span>{locale === 'en' ? link.title_en : link.title}</span>
-                <HiExternalLink className="w-4 h-4" />
-              </a>
-            ))}
             <div className="flex items-center justify-end space-x-2 px-3 py-2">
               <ThemeToggle variant="mobile" />
               <ToggleLanguage variant="mobile" />

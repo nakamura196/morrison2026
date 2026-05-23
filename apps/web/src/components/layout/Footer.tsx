@@ -24,10 +24,13 @@ export default function Footer() {
   return (
     <footer className="bg-surface text-ink border-t border-brand">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        {/* Column 1 (site name + description) is wider than the link columns so
+            the long site name (モリソンパンフレット統合データベース) fits on one
+            line at desktop width instead of orphaning its last character. */}
+        <div className="grid grid-cols-1 md:grid-cols-[1.6fr_1fr_1fr_1fr] gap-8 mb-8">
           {/* Column 1: Site info */}
           <div className="space-y-4">
-            <h3 className="font-serif text-base text-brand border-b border-brand pb-2">
+            <h3 className="font-serif text-base text-balance text-brand border-b border-brand pb-2">
               {config.siteName}
             </h3>
             <p className="text-sm text-ink-muted leading-relaxed">

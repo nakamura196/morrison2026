@@ -77,7 +77,7 @@ export default function ItemShareExport({
   return (
     <section
       aria-label={labels.heading}
-      className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
     >
       <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
@@ -85,31 +85,31 @@ export default function ItemShareExport({
         </h2>
       </div>
 
-      <div className="px-6 py-4 grid gap-4 md:grid-cols-3">
+      <div className="px-6 py-4 flex flex-col gap-5">
+        {/* Citation first — the most broadly useful action. Share next, then
+            export (JSON / IIIF) last, since those are unfamiliar to most
+            visitors. */}
         <div>
           <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-            {labels.exportGroup}
+            {labels.citationGroup}
           </h3>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={handleJsonDownload} className={btnBase}>
-              <HiDownload className="w-4 h-4" />
-              {labels.jsonExport}
+          <div className="flex items-start gap-2">
+            <p className="flex-1 text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2">
+              {citation}
+            </p>
+            <button
+              type="button"
+              onClick={() => handleCopy(citation, setCitationCopied)}
+              aria-label={citationCopied ? labels.copied : labels.copyCitation}
+              title={citationCopied ? labels.copied : labels.copyCitation}
+              className={`${btnBase} shrink-0`}
+            >
+              {citationCopied ? (
+                <HiClipboardCheck className="w-4 h-4" />
+              ) : (
+                <HiClipboard className="w-4 h-4" />
+              )}
             </button>
-            {hasImages && (
-              <a
-                href={manifestUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={btnBase}
-              >
-                <img
-                  src="https://iiif.io/assets/images/logos/logo-sm.png"
-                  alt=""
-                  className="w-4 h-4"
-                />
-                {labels.iiifManifest}
-              </a>
-            )}
           </div>
         </div>
 
@@ -166,25 +166,28 @@ export default function ItemShareExport({
 
         <div>
           <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-            {labels.citationGroup}
+            {labels.exportGroup}
           </h3>
-          <div className="flex items-start gap-2">
-            <p className="flex-1 text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2 max-h-24 overflow-y-auto">
-              {citation}
-            </p>
-            <button
-              type="button"
-              onClick={() => handleCopy(citation, setCitationCopied)}
-              aria-label={citationCopied ? labels.copied : labels.copyCitation}
-              title={citationCopied ? labels.copied : labels.copyCitation}
-              className={`${btnBase} shrink-0`}
-            >
-              {citationCopied ? (
-                <HiClipboardCheck className="w-4 h-4" />
-              ) : (
-                <HiClipboard className="w-4 h-4" />
-              )}
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={handleJsonDownload} className={btnBase}>
+              <HiDownload className="w-4 h-4" />
+              {labels.jsonExport}
             </button>
+            {hasImages && (
+              <a
+                href={manifestUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={btnBase}
+              >
+                <img
+                  src="https://iiif.io/assets/images/logos/logo-sm.png"
+                  alt=""
+                  className="w-4 h-4"
+                />
+                {labels.iiifManifest}
+              </a>
+            )}
           </div>
         </div>
       </div>

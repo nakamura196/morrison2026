@@ -8,6 +8,7 @@ export default async function Common({
   title,
   breadcrumbs,
   isFullWidth = false,
+  hideHeading = false,
 }: {
   children: React.ReactNode
   title: string
@@ -16,6 +17,9 @@ export default async function Common({
     label: string
   }[]
   isFullWidth?: boolean
+  /** Skip the breadcrumb + centered title block so content (e.g. the item
+   *  viewer) continues directly under the header, NDL-style. */
+  hideHeading?: boolean
 }) {
   const t = await getTranslations('Breadcrumb')
 
@@ -29,30 +33,34 @@ export default async function Common({
             isFullWidth
               ? 'container-fluid px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20'
               : 'max-w-7xl px-4 sm:px-6 lg:px-8'
-          } py-8 sm:py-12`}
+          } ${hideHeading ? 'pt-4 pb-8 sm:pb-12' : 'py-8 sm:py-12'}`}
         >
-          <div className="mb-8">
-            <BreadcrumbClient
-              title={title}
-              items={breadcrumbs}
-              t={{
-                home: t('home'),
-                ariaLabel: t('ariaLabel'),
-              }}
-            />
-          </div>
-
-          {title && (
-            <div className="text-center mb-12">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-ink mb-4 tracking-tight">
-                {title}
-              </h1>
-              <div className="flex items-center justify-center space-x-2">
-                <div className="h-1 w-12 bg-brand/30 rounded-full" />
-                <div className="h-1 w-20 bg-brand rounded-full" />
-                <div className="h-1 w-12 bg-brand/30 rounded-full" />
+          {!hideHeading && (
+            <>
+              <div className="mb-8">
+                <BreadcrumbClient
+                  title={title}
+                  items={breadcrumbs}
+                  t={{
+                    home: t('home'),
+                    ariaLabel: t('ariaLabel'),
+                  }}
+                />
               </div>
-            </div>
+
+              {title && (
+                <div className="text-center mb-12">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-ink mb-4 tracking-tight">
+                    {title}
+                  </h1>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="h-1 w-12 bg-brand/30 rounded-full" />
+                    <div className="h-1 w-20 bg-brand rounded-full" />
+                    <div className="h-1 w-12 bg-brand/30 rounded-full" />
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {children}

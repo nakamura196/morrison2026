@@ -24,6 +24,7 @@ import OpenSeadragonViewer, {
   type ViewerApi,
   type ViewerHighlight,
 } from './OpenSeadragonViewer'
+import Thumb from '@/components/ui/Thumb'
 
 export interface OcrLine {
   text: string
@@ -63,7 +64,7 @@ interface PageMatch {
 type Tab = 'hits' | 'pages' | 'ocr'
 
 function thumbUrl(serviceId: string): string {
-  return `${serviceId}/full/!200,280/0/default.jpg`
+  return `${serviceId}/full/!400,400/0/default.jpg`
 }
 
 /** Highlight literal occurrences of `term` in `text`. */
@@ -222,6 +223,16 @@ export default function BookViewer({
     setDraft(query ?? '')
   }
 
+  // Whether this item has any OCR text at all. The OCR + 本文検索 tabs only
+  // make sense when it does; otherwise we show just the page list.
+  const hasOcr = useMemo(
+    () =>
+      ocrPages.some(
+        (p) => (p.text && p.text.trim().length > 0) || (p.lines && p.lines.length > 0),
+      ),
+    [ocrPages],
+  )
+
   const matches = useMemo(
     () => (activeQuery ? findMatches(pages, activeQuery) : []),
     [pages, activeQuery],
@@ -248,12 +259,19 @@ export default function BookViewer({
   // still '' until then). setState-during-render, guarded so it runs once.
   if (activeId === '' && initialActiveId) {
     setActiveId(initialActiveId)
-    setTab(activeQuery && matches.length ? 'hits' : 'pages')
+    setTab(hasOcr && activeQuery && matches.length ? 'hits' : 'pages')
   }
+  // If the item has no OCR, the OCR / 本文検索 tabs aren't rendered — keep the
+  // active tab on the page list so we never show an empty hidden tab.
+  if (!hasOcr && tab !== 'pages') setTab('pages')
 
   const active = useMemo(
     () => pages.find((p) => p.page_id === activeId) ?? pages[0],
     [pages, activeId],
+  )
+  const activeIdx = useMemo(
+    () => pages.findIndex((p) => p.page_id === (active?.page_id ?? activeId)),
+    [pages, active, activeId],
   )
 
   const submitQuery = (next: string) => {
@@ -308,6 +326,11 @@ export default function BookViewer({
   const goToPage = (pageId: string) => {
     if (pageId !== active.page_id) setActiveId(pageId)
   }
+  const goToIndex = (idx: number) => {
+    if (idx >= 0 && idx < pages.length) setActiveId(pages[idx].page_id)
+  }
+  const hasPrev = activeIdx > 0
+  const hasNext = activeIdx >= 0 && activeIdx < pages.length - 1
   const focusOnLine = (pageId: string, line: OcrLine) => {
     if (pageId !== active.page_id) {
       setActiveId(pageId)
@@ -333,8 +356,8 @@ export default function BookViewer({
   )
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="min-w-0">
+    <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="relative min-w-0">
         <OpenSeadragonViewer
           ref={viewerApi}
           key={active.infoUrl}
@@ -345,19 +368,51 @@ export default function BookViewer({
           highlights={activeHighlights}
           focusedHighlightId={hoveredId}
         />
+
+        {/* Prev / next page — overlaid on the image edges. */}
+        <button
+          type="button"
+          onClick={() => goToIndex(activeIdx - 1)}
+          disabled={!hasPrev}
+          aria-label={t('prevPage')}
+          title={t('prevPage')}
+          className="absolute left-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/70 disabled:pointer-events-none disabled:opacity-0"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => goToIndex(activeIdx + 1)}
+          disabled={!hasNext}
+          aria-label={t('nextPage')}
+          title={t('nextPage')}
+          className="absolute right-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/70 disabled:pointer-events-none disabled:opacity-0"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Page indicator. */}
+        <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1 font-mono text-xs text-white shadow-lg backdrop-blur-sm">
+          {t('pageOf', { cur: activeIdx + 1, total: pages.length })}
+        </div>
       </div>
 
       <aside className="flex h-[calc(100vh-12rem)] min-h-[420px] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div className="flex border-b border-gray-200 dark:border-gray-800">
-          {tabBtn(
-            'hits',
-            <>
-              {t('inPageSearch')}
-              {activeQuery && <span className="ml-1 text-xs font-normal text-gray-500">({totalHits})</span>}
-            </>,
-          )}
           {tabBtn('pages', <>{t('pages')} ({pages.length})</>)}
-          {tabBtn('ocr', t('ocr'))}
+          {hasOcr && tabBtn('ocr', t('ocr'))}
+          {hasOcr &&
+            tabBtn(
+              'hits',
+              <>
+                {t('inPageSearch')}
+                {activeQuery && <span className="ml-1 text-xs font-normal text-gray-500">({totalHits})</span>}
+              </>,
+            )}
         </div>
 
         {tab === 'hits' ? (
@@ -473,7 +528,7 @@ export default function BookViewer({
           </div>
         ) : tab === 'pages' ? (
           <div className="flex-1 overflow-y-auto p-2">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 xl:grid-cols-6">
               {pages.map((p) => {
                 const selected = p.page_id === active.page_id
                 const hits = matches.find((x) => x.page.page_id === p.page_id)
@@ -484,22 +539,22 @@ export default function BookViewer({
                     onClick={() => setActiveId(p.page_id)}
                     aria-pressed={selected}
                     title={p.page_key}
-                    className={`group relative flex flex-col items-center gap-1 rounded-md border p-1 transition ${
+                    className={`group relative flex flex-col items-center gap-0.5 rounded border p-0.5 transition ${
                       selected
                         ? 'border-amber-500 bg-amber-50/40 ring-2 ring-amber-300/60 dark:bg-amber-900/10'
                         : 'border-gray-200 hover:border-gray-400 dark:border-gray-700'
                     }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Thumb
                       src={thumbUrl(p.serviceId)}
                       alt={p.page_key}
-                      loading="lazy"
-                      className="aspect-[3/4] w-full rounded-sm bg-gray-100 object-cover dark:bg-gray-800"
+                      aspect="aspect-[3/4]"
+                      pad="p-0.5"
+                      className="w-full rounded-sm"
                     />
-                    <span className="font-mono text-[11px] text-gray-700 dark:text-gray-300">{p.page_key}</span>
+                    <span className="font-mono text-[10px] leading-tight text-gray-600 dark:text-gray-400">{p.page_key}</span>
                     {hits && (
-                      <span className="absolute right-1 top-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-semibold text-white">
+                      <span className="absolute right-0.5 top-0.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-amber-500 px-1 text-[9px] font-semibold text-white">
                         {hits.lines.length}
                       </span>
                     )}

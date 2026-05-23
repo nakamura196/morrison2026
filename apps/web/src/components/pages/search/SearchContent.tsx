@@ -10,6 +10,7 @@ import { Link } from '@/i18n/routing'
 import { SearchUI, SearchBox } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import { searchFields, resultFields } from '@/config/search'
+import Thumb from '@/components/ui/Thumb'
 
 type ViewMode = 'list' | 'grid'
 
@@ -201,16 +202,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
                     className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors overflow-hidden"
                   >
                     {/* Thumbnail: 余白付きで全体表示（判型がバラバラなのでトリミングしない） */}
-                    {thumbnailUrl && (
-                      <div className="aspect-[3/4] bg-gray-50 dark:bg-gray-900/40 flex items-center justify-center p-2">
-                        <img
-                          src={thumbnailUrl}
-                          alt={title}
-                          className="max-w-full max-h-full object-contain"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
+                    {thumbnailUrl && <Thumb src={thumbnailUrl} alt={title} />}
 
                     <div className="p-3">
                       <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100 hover:underline line-clamp-2 mb-2">

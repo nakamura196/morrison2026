@@ -20,7 +20,10 @@
     "loading": "Loading…",
     "noImages": "No images",
     "moreHits": "{n} more…",
-    "chars": "{n} chars"
+    "chars": "{n} chars",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "{cur} / {total}"
   },
   "Common": {
     "title": "Morrison Pamphlets Integrated Database",

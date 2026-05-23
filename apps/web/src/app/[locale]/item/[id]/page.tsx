@@ -2,7 +2,7 @@ import Common from '@/components/layout/Common'
 import { config } from '@/config'
 import { getConfig } from '@/libs/getConfig'
 import { Metadata } from 'next'
-import { cache } from 'react'
+import { cache, type ReactNode } from 'react'
 import { getDefaultMetadata } from '@/libs/metadata'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createHeaders } from '@/libs/api'
@@ -138,6 +138,39 @@ export const generateMetadata = async ({
   }
 }
 
+/**
+ * One bibliographic field (dt/dd). Renders nothing when empty, so callers can
+ * list every field unconditionally. In the 2-column metadata grid, `wide`
+ * fields (long text / URLs) span both columns; the rest pair up two-per-row.
+ */
+function MetaField({
+  label,
+  wide = false,
+  valueClassName,
+  children,
+}: {
+  label: string
+  wide?: boolean
+  valueClassName?: string
+  children?: ReactNode
+}) {
+  if (children == null || children === '' || (Array.isArray(children) && children.length === 0)) {
+    return null
+  }
+  return (
+    <div
+      className={`px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 last:border-b-0 sm:grid sm:grid-cols-[7rem_1fr] sm:gap-4 ${
+        wide ? 'lg:col-span-2' : ''
+      }`}
+    >
+      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd className={`mt-1 sm:mt-0 break-words text-sm text-gray-900 dark:text-gray-100 ${valueClassName ?? ''}`}>
+        {children}
+      </dd>
+    </div>
+  )
+}
+
 export default async function ItemPage({
   params,
   searchParams,
@@ -148,7 +181,6 @@ export default async function ItemPage({
   const { id } = await params
   const resolvedSearchParams = await searchParams
   const locale = await getLocale()
-  const tCommon = await getTranslations('Common')
   const t = await getTranslations('ItemPage')
 
   const [{ item, raw }, lastUpdatedMs, localeConfig] = await Promise.all([
@@ -183,13 +215,6 @@ export default async function ItemPage({
   }
   const searchHref = `/search${searchUrlParams.toString() ? `?${searchUrlParams.toString()}` : ''}`
 
-  const breadcrumbs = [
-    {
-      href: searchHref,
-      label: tCommon('search'),
-    },
-  ]
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
 
   // IIIF manifest URL
@@ -222,7 +247,7 @@ export default async function ItemPage({
 
   return (
     <div>
-      <Common title={title} breadcrumbs={breadcrumbs}>
+      <Common isFullWidth title={title} hideHeading>
         {/* IIIF Viewer (OpenSeadragon) — opens at the matched page and
             highlights the search term in-image when arriving from full-text search. */}
         {hasImages && (
@@ -233,6 +258,10 @@ export default async function ItemPage({
             searchQuery={resolvedSearchParams.q}
           />
         )}
+
+        {/* Viewer and the metadata / share area below both span the full page
+            width (the page is rendered with Common's full-width container). */}
+        <div>
 
         {/* Thumbnail fallback (when no IIIF viewer) */}
         {!hasImages && item.thumbnail_urls?.large && (
@@ -245,238 +274,56 @@ export default async function ItemPage({
           </div>
         )}
 
-        <ItemShareExport
-          itemId={id}
-          title={title}
-          pageUrl={pageUrl}
-          manifestUrl={manifestUrl}
-          hasImages={!!hasImages}
-          itemJson={raw ?? {}}
-          citation={citation}
-          labels={{
-            heading: t('shareExportHeading'),
-            exportGroup: t('exportGroup'),
-            shareGroup: t('shareGroup'),
-            citationGroup: t('citationGroup'),
-            jsonExport: t('jsonExport'),
-            iiifManifest: t('iiifManifest'),
-            copyLink: t('copyLink'),
-            copyCitation: t('copyCitation'),
-            copied: t('copied'),
-            shareOnX: t('shareOnX'),
-            shareOnFacebook: t('shareOnFacebook'),
-            shareOnLine: t('shareOnLine'),
-          }}
-        />
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Two columns below the viewer: bibliographic info on the left,
+            share / export / citation panel on the right. */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+        {/* Left: bibliographic info */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="px-6 py-4 bg-surface-sunken border-b border-brand">
             <h2 className="text-lg font-bold text-ink">
               {t('bibliographicInfo')}
             </h2>
           </div>
 
-          <dl className="divide-y divide-gray-200 dark:divide-gray-700">
-            {/* Title */}
-            {item.title && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('title')}
-                </dt>
-                <dd className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.title}
-                </dd>
-              </div>
-            )}
-
-            {/* Title Statement */}
-            {item.titleStatement && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('titleStatement')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.titleStatement}
-                </dd>
-              </div>
-            )}
-
-            {/* Author */}
-            {item.heading1 && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('author')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.heading1}
-                </dd>
-              </div>
-            )}
-
-            {/* Description */}
-            {item.description && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('description')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.description}
-                </dd>
-              </div>
-            )}
-
-            {/* Abstract (English) */}
-            {item.abstract_en && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('abstractEn')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.abstract_en}
-                </dd>
-              </div>
-            )}
-
-            {/* Abstract (Japanese) */}
-            {item.abstract_ja && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('abstractJa')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.abstract_ja}
-                </dd>
-              </div>
-            )}
-
-            {/* Language */}
-            {item.language && item.language.length > 0 && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('language')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.language.map(lang => lang.toUpperCase()).join(', ')}
-                </dd>
-              </div>
-            )}
-
-            {/* Publication */}
-            {item.publication && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('publication')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.publication}
-                </dd>
-              </div>
-            )}
-
-            {/* Publisher */}
-            {item.publisher && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('publisher')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.publisher}
-                </dd>
-              </div>
-            )}
-
-            {/* Date */}
-            {item.date && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('date')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.date}
-                </dd>
-              </div>
-            )}
-
-            {/* Publication Year */}
-            {item.publication_year && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('publicationYear')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.publication_year}
-                </dd>
-              </div>
-            )}
-
-            {/* Format */}
-            {item.format && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('format')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.format}
-                </dd>
-              </div>
-            )}
-
-            {/* Call Number */}
-            {item.callNumber && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('callNumber')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.callNumber}
-                </dd>
-              </div>
-            )}
-
-            {/* Classification */}
-            {item.tag1 && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('classification')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.tag1}
-                </dd>
-              </div>
-            )}
-
-            {/* Sub-Classification */}
-            {(item.tag2 || item.tag3) && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('subClassification')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {[item.tag2, item.tag3].filter(Boolean).join(' > ')}
-                </dd>
-              </div>
-            )}
-
-            {/* Holding */}
-            {item.holding && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('holding')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.holding}
-                </dd>
-              </div>
-            )}
-
-            {/* Is Part Of */}
-            {item.isPartOf && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('isPartOf')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.isPartOf.startsWith('http') ? (
+          <dl>
+            <MetaField label={t('title')} wide valueClassName="font-semibold">
+              {item.title}
+            </MetaField>
+            <MetaField label={t('titleStatement')} wide>
+              {item.titleStatement}
+            </MetaField>
+            <MetaField label={t('author')}>{item.heading1}</MetaField>
+            <MetaField label={t('description')} wide>
+              {item.description}
+            </MetaField>
+            <MetaField label={t('abstractEn')} wide>
+              {item.abstract_en}
+            </MetaField>
+            <MetaField label={t('abstractJa')} wide>
+              {item.abstract_ja}
+            </MetaField>
+            <MetaField label={t('language')}>
+              {item.language && item.language.length > 0
+                ? item.language.map((lang) => lang.toUpperCase()).join(', ')
+                : null}
+            </MetaField>
+            <MetaField label={t('publication')}>{item.publication}</MetaField>
+            <MetaField label={t('publisher')}>{item.publisher}</MetaField>
+            <MetaField label={t('date')}>{item.date}</MetaField>
+            <MetaField label={t('publicationYear')}>{item.publication_year}</MetaField>
+            <MetaField label={t('format')}>{item.format}</MetaField>
+            <MetaField label={t('callNumber')}>{item.callNumber}</MetaField>
+            <MetaField label={t('classification')}>{item.tag1}</MetaField>
+            <MetaField label={t('subClassification')}>
+              {item.tag2 || item.tag3
+                ? [item.tag2, item.tag3].filter(Boolean).join(' > ')
+                : null}
+            </MetaField>
+            <MetaField label={t('holding')}>{item.holding}</MetaField>
+            <MetaField label={t('isPartOf')} wide>
+              {item.isPartOf
+                ? item.isPartOf.startsWith('http')
+                  ? (
                     <a
                       href={item.isPartOf}
                       target="_blank"
@@ -485,21 +332,14 @@ export default async function ItemPage({
                     >
                       {item.isPartOf}
                     </a>
-                  ) : (
-                    item.isPartOf
-                  )}
-                </dd>
-              </div>
-            )}
-
-            {/* References */}
-            {item.references && (
-              <div className="px-6 py-4 sm:grid sm:grid-cols-4 sm:gap-4">
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {t('references')}
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-3 sm:mt-0">
-                  {item.references.startsWith('http') ? (
+                  )
+                  : item.isPartOf
+                : null}
+            </MetaField>
+            <MetaField label={t('references')} wide>
+              {item.references
+                ? item.references.startsWith('http')
+                  ? (
                     <a
                       href={item.references}
                       target="_blank"
@@ -508,13 +348,39 @@ export default async function ItemPage({
                     >
                       {item.references}
                     </a>
-                  ) : (
-                    item.references
-                  )}
-                </dd>
-              </div>
-            )}
+                  )
+                  : item.references
+                : null}
+            </MetaField>
           </dl>
+        </div>
+
+        {/* Right: share / export / citation */}
+        <div className="lg:col-span-1">
+          <ItemShareExport
+            itemId={id}
+            title={title}
+            pageUrl={pageUrl}
+            manifestUrl={manifestUrl}
+            hasImages={!!hasImages}
+            itemJson={raw ?? {}}
+            citation={citation}
+            labels={{
+              heading: t('shareExportHeading'),
+              exportGroup: t('exportGroup'),
+              shareGroup: t('shareGroup'),
+              citationGroup: t('citationGroup'),
+              jsonExport: t('jsonExport'),
+              iiifManifest: t('iiifManifest'),
+              copyLink: t('copyLink'),
+              copyCitation: t('copyCitation'),
+              copied: t('copied'),
+              shareOnX: t('shareOnX'),
+              shareOnFacebook: t('shareOnFacebook'),
+              shareOnLine: t('shareOnLine'),
+            }}
+          />
+        </div>
         </div>
 
         {/* Last updated */}
@@ -535,6 +401,7 @@ export default async function ItemPage({
             </svg>
             {t('backToSearch')}
           </Link>
+        </div>
         </div>
       </Common>
     </div>

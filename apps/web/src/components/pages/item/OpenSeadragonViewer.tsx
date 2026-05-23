@@ -124,8 +124,7 @@ const OpenSeadragonViewer = forwardRef<ViewerApi, ViewerProps>(function OpenSead
         element: ref.current,
         prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@6.0.2/build/openseadragon/images/',
         tileSources: infoUrl,
-        showNavigator: true,
-        navigatorPosition: 'TOP_RIGHT',
+        showNavigator: false,
         showRotationControl: true,
         gestureSettingsMouse: { clickToZoom: false, dblClickToZoom: true },
         // Default maxZoomPixelRatio (1.1) caps fitBounds so a small region
