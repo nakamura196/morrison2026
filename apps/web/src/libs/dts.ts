@@ -40,6 +40,17 @@ export const TEI_BASE = (process.env.MORRISON_TEI_BASE || '').replace(/\/+$/, ''
 
 export const MEDIA_TYPE_TEI = 'application/tei+xml'
 
+/**
+ * IIIF Image API base for page images (same clean PTIF served by Cantaloupe via
+ * media.toyobunko-lab.jp as the IIIF manifest route). Used to wire `<graphic>`
+ * in the generated TEI facsimile. The image identifier is
+ * `morrison_p/<group>/<callNumber>/<NNNN>.tif`.
+ */
+export const MEDIA_IIIF_BASE = (process.env.MORRISON_MEDIA_IIIF_BASE || 'https://media.toyobunko-lab.jp/iiif/3').replace(/\/+$/, '')
+
+/** IIIF Presentation version used when referencing canvas / manifest URIs from the TEI. */
+export const IIIF_VERSION = '3'
+
 /** Group folder = first two hyphen-segments of the callNumber (`P-III-a-0083` -> `P-III`). */
 export function deriveGroup(callNumber: string): string {
   const p = callNumber.split('-')
@@ -231,15 +242,65 @@ export interface PageText {
   text: string
 }
 
-/** One `<div type="textpart" subtype="page">` per page, lines split into `<lb/>`. */
-function pageToDiv(p: PageText): string {
+/** Options for wiring the TEI facsimile to the finalized IIIF image / canvas / manifest URIs. */
+export interface FacsimileOptions {
+  /** Public site host (for canvas / manifest URIs), e.g. https://morrison.toyobunko-lab.jp */
+  host: string
+  /** Group folder (P-III) for the image identifier. */
+  group: string
+  /** Number of page images / surfaces to emit (usually page_count). */
+  pageCount: number
+}
+
+/** IIIF Image API service URL for one page (zero-padded to 4), identifier %2F-encoded. */
+function imageServiceUrl(group: string, callNumber: string, page: number): string {
+  const ident = `morrison_p/${group}/${callNumber}/${String(page).padStart(4, '0')}.tif`
+  return `${MEDIA_IIIF_BASE}/${encodeURIComponent(ident)}`
+}
+
+/** IIIF Presentation canvas URI matching the /api/iiif manifest route (`.../canvas/p<N>`). */
+function canvasUri(host: string, callNumber: string, page: number): string {
+  return `${host}/api/iiif/${IIIF_VERSION}/${callNumber}/canvas/p${page}`
+}
+
+/** IIIF Presentation manifest URI matching the /api/iiif manifest route. */
+export function manifestUri(host: string, callNumber: string): string {
+  return `${host}/api/iiif/${IIIF_VERSION}/${callNumber}/manifest`
+}
+
+/**
+ * `<facsimile>` wired to the IIIF Image API (`<graphic>`), each `<surface>`
+ * linked to its IIIF Presentation canvas (`@sameAs`), the whole facsimile to the
+ * manifest (`@source`). One surface per page image (1..pageCount). Mirrors the
+ * canonical S3 TEI's facsimile, minus the ALTO zone-level coords ES lacks.
+ */
+function buildFacsimile(callNumber: string, opts: FacsimileOptions): string {
+  const surfaces: string[] = []
+  for (let n = 1; n <= opts.pageCount; n++) {
+    const svc = imageServiceUrl(opts.group, callNumber, n)
+    surfaces.push(
+      `    <surface xml:id="f${n}" n="${n}" sameAs="${xmlEscape(canvasUri(opts.host, callNumber, n))}">\n` +
+        `      <graphic url="${xmlEscape(svc)}/full/max/0/default.jpg" sameAs="${xmlEscape(svc)}/info.json"/>\n` +
+        `    </surface>`,
+    )
+  }
+  return `  <facsimile source="${xmlEscape(manifestUri(opts.host, callNumber))}">\n${surfaces.join('\n')}\n  </facsimile>`
+}
+
+/**
+ * One `<div type="textpart" subtype="page">` per page, lines split into `<lb/>`.
+ * When `facsPageCount` is given, `<pb>` links to its surface (`facs="#f<N>"`) as
+ * long as the page is within range.
+ */
+function pageToDiv(p: PageText, facsPageCount = 0): string {
   const lines = (p.text || '').split('\n').map((l) => l.trimEnd())
   const body = lines.length
     ? lines.map((l) => xmlEscape(l)).join('<lb/>\n          ')
     : ''
+  const facs = facsPageCount && p.page >= 1 && p.page <= facsPageCount ? ` facs="#f${p.page}"` : ''
   return (
     `      <div type="textpart" subtype="page" n="${xmlEscape(String(p.page))}">\n` +
-    `        <pb n="${xmlEscape(String(p.page))}"/>\n` +
+    `        <pb n="${xmlEscape(String(p.page))}"${facs}/>\n` +
     `        <ab>${body}</ab>\n` +
     `      </div>`
   )
@@ -267,13 +328,25 @@ function teiHeader(callNumber: string, b: BibSource): string {
   )
 }
 
-/** Full TEI document for an item, generated from ES page text. */
-export function buildTeiDocument(callNumber: string, b: BibSource, pages: PageText[]): string {
-  const divs = pages.map(pageToDiv).join('\n')
+/**
+ * Full TEI document for an item, generated from ES page text. When `facs` is
+ * given, a `<facsimile>` wired to the IIIF Image API + Presentation canvas /
+ * manifest URIs is emitted and the page breaks link to it.
+ */
+export function buildTeiDocument(
+  callNumber: string,
+  b: BibSource,
+  pages: PageText[],
+  facs?: FacsimileOptions,
+): string {
+  const pageCount = facs?.pageCount ?? 0
+  const divs = pages.map((p) => pageToDiv(p, pageCount)).join('\n')
+  const facsimile = facs && pageCount > 0 ? `${buildFacsimile(callNumber, facs)}\n` : ''
   return (
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<TEI xmlns="http://www.tei-c.org/ns/1.0">\n` +
     `${teiHeader(callNumber, b)}\n` +
+    facsimile +
     `  <text>\n    <body>\n      <div type="edition" n="${xmlEscape(callNumber)}">\n` +
     `${divs}\n` +
     `      </div>\n    </body>\n  </text>\n` +

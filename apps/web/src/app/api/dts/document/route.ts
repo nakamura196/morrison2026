@@ -107,7 +107,11 @@ export async function GET(request: NextRequest) {
       if (!wantsXml) {
         return new Response(plain(pages), { headers: dtsHeaders('text/plain; charset=utf-8') })
       }
-      return new Response(buildTeiDocument(resource, b, pages), { headers: dtsHeaders(xmlCT) })
+      // Wire a <facsimile> to the IIIF image / canvas / manifest URIs so the
+      // generated TEI is not degraded vs the canonical (minus zone coords).
+      const facsPageCount = pageCount || Math.max(...pages.map((p) => p.page))
+      const tei = buildTeiDocument(resource, b, pages, { host, group, pageCount: facsPageCount })
+      return new Response(tei, { headers: dtsHeaders(xmlCT) })
     }
 
     // ---- Fragment: per-page from ES, wrapped in <dts:wrapper> ----
