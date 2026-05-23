@@ -269,16 +269,8 @@ export default async function ItemPage({
             width (the page is rendered with Common's full-width container). */}
         <div>
 
-        {/* Thumbnail fallback (when no IIIF viewer) */}
-        {!hasImages && item.thumbnail_urls?.large && (
-          <div className="mb-6 flex justify-center">
-            <img
-              src={item.thumbnail_urls.large}
-              alt={title}
-              className="max-h-96 rounded-lg shadow-md"
-            />
-          </div>
-        )}
+        {/* 画像なしアイテムはサムネ非表示(旧 Omeka files 依存を除去)。
+            画像ありは上の IIIF ビューア(media. クリーンPTIF)が担当。 */}
 
         {/* Two columns below the viewer: bibliographic info on the left,
             share / export / citation panel on the right. */}

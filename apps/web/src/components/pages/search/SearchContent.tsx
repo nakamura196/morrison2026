@@ -11,6 +11,7 @@ import { SearchUI, SearchBox } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import { searchFields, resultFields } from '@/config/search'
 import Thumb from '@/components/ui/Thumb'
+import { mediaThumbUrl } from '@/libs/media-image'
 
 type ViewMode = 'list' | 'grid'
 
@@ -181,7 +182,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
                 const tag1 = result.tag1?.raw
                 const hasImage = result.has_image?.raw
                 const publicationYear = result.publication_year?.raw
-                const thumbnailUrl = result.thumbnail_urls?.raw?.medium
+                const thumbnailUrl = hasImage ? mediaThumbUrl(callNumber, 1, 400) : ''
                 const id = result.id?.raw || `item-${index}`
 
                 // Build search params for navigation
@@ -252,7 +253,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
               const tag1 = result.tag1?.raw
               const hasImage = result.has_image?.raw
               const publicationYear = result.publication_year?.raw
-              const thumbnailUrl = result.thumbnail_urls?.raw?.small
+              const thumbnailUrl = hasImage ? mediaThumbUrl(callNumber, 1, 200) : ''
               const id = result.id?.raw || `item-${index}`
 
               // Collect all highlights for display

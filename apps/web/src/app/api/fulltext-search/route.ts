@@ -10,30 +10,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { esSearch } from '@toyo/shared-lib'
 import { ensureEnv } from '@/libs/cf-env'
+import { mediaThumbUrl } from '@/libs/media-image'
 
 const INDEX_NAME = process.env.FULLTEXT_INDEX_NAME || 'morrison'
 const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
-// IIIF Image API (Cantaloupe) のベース。現状は Omeka 系の mo-img が唯一稼働中
-// (docs/image-architecture-investigation.md §3-1)。将来 mdx の Cantaloupe に
-// 寄せる時はこの env を差し替えるだけでよい。
-const IIIF_IMAGE_BASE = process.env.IIIF_IMAGE_BASE_URL || 'https://mo-img.aws.ldas.jp/iiif/3'
-
 /**
- * ヒットしたページ番号から IIIF Image API のサムネ URL を組み立てる。
- * S3 キー命名規則 `files/original/<group>/<callNumber>/<callNumber>_<NNNN>.jpg`
- * の PATH_PREFIX を除いた identifier を使う(docs §4-2)。
- *   group = callNumber の先頭2セグメント (P-III-a-3247 → P-III)
- *   NNNN  = ページ番号のゼロ埋め4桁 (30 → 0030)
- * 移行未完で画像が無いアイテムは 404 になるため、表示側でアイテムサムネへ
- * フォールバックする。
+ * ヒットしたページのサムネ URL。s3ds のクリーンPTIF
+ * (`morrison_p/<group>/<callNumber>/<NNNN>.tif`) を media.toyobunko-lab.jp の
+ * Cantaloupe で配信。Omeka 非依存(mediaThumbUrl が identifier を組み立てる)。
  */
 function buildPageThumbnailUrl(callNumber: string, page: string | number): string {
   if (!callNumber || page === '' || page === undefined || page === null) return ''
-  const group = callNumber.split('-').slice(0, 2).join('-')
-  const nnnn = String(page).padStart(4, '0')
-  const identifier = encodeURIComponent(`${group}/${callNumber}/${callNumber}_${nnnn}.jpg`)
-  return `${IIIF_IMAGE_BASE}/${identifier}/full/!300,300/0/default.jpg`
+  return mediaThumbUrl(callNumber, page, 300)
 }
 
 interface SearchFilter {
@@ -288,7 +277,7 @@ export async function POST(request: NextRequest) {
       const textSnippet = snippets.join(' ... ')
       const bib = bibMap.get(hit._source.item_id)
       const callNumber = bib?.callNumber || ''
-      const thumbnailUrl = bib?.thumbnail_urls?.medium || bib?.thumbnail_urls?.small || ''
+      const thumbnailUrl = bib?.has_image ? mediaThumbUrl(callNumber, 1, 300) : ''
 
       return {
         id: { raw: hit._id },
