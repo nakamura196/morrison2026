@@ -57,6 +57,12 @@ next-env.d.ts
 scripts/*.py
 scripts/**/*.py
 
+# setup scripts that reference 1Password items (op:// 名を公開repoに出さない)
+scripts/setup/
+
+# internal investigation docs (op item名・旧キー断片への言及を含むため非公開)
+docs/
+
 # temp
 tmp/
 scripts/tmp/
