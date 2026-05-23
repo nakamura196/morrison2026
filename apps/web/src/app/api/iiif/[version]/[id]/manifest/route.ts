@@ -131,6 +131,13 @@ export async function GET(
   // Content search service (existing OCR index)
   const searchServiceUrl = `${host}/api/iiif-search/1/${id}`
 
+  // Items with OCR/transcription text get a per-canvas annotation list (text
+  // layer), served as Presentation 3. Only wire it into the v3 manifest — the
+  // text-layer endpoint is v3-only, so a v2 manifest must not reference it.
+  // (The internal viewer fetches the v2 manifest purely for image service IDs.)
+  // Pages without text simply yield an empty AnnotationPage.
+  const hasAnnotations = version === '3' && item.has_fulltext === true
+
   const manifest = buildManifestV2({
     id: `${prefix}/manifest`,
     label: (item.title as string) || id,
@@ -140,6 +147,7 @@ export async function GET(
     searchServiceUrl,
     viewingDirection: 'left-to-right',
     hasImageService: true,
+    hasAnnotations,
   })
 
   // v3 conversion

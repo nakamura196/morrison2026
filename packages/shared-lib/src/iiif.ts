@@ -40,6 +40,11 @@ export interface IIIFManifestOptions {
   searchServiceUrl?: string
   /** Whether images have IIIF Image API service */
   hasImageService?: boolean
+  /** When true, each canvas references its per-page annotation list at
+   *  `${prefix}/annotations/p<N>` (v2 `otherContent`; converts to v3
+   *  `annotations` AnnotationPage). Use for items that have OCR/transcription
+   *  text so IIIF clients (Mirador/UV) can fetch the text layer per canvas. */
+  hasAnnotations?: boolean
 }
 
 export interface IIIFAnnotation {
@@ -123,6 +128,7 @@ export function buildCanvas(
   index: number,
   prefix: string,
   _hasImageService = false,
+  hasAnnotations = false,
 ): Record<string, unknown> {
   const page = index + 1
   const canvasId = `${prefix}/canvas/p${page}`
@@ -182,6 +188,18 @@ export function buildCanvas(
     ]
   }
 
+  // Reference this canvas's per-page annotation list (OCR/transcription text).
+  // The `@iiif/parser` v2→v3 converter turns `otherContent` (sc:AnnotationList)
+  // into `annotations` (AnnotationPage), so this works for both versions.
+  if (hasAnnotations) {
+    canvas.otherContent = [
+      {
+        '@id': `${prefix}/annotations/p${page}`,
+        '@type': 'sc:AnnotationList',
+      },
+    ]
+  }
+
   return canvas
 }
 
@@ -192,7 +210,7 @@ export function buildCanvas(
  */
 export function buildManifestV2(options: IIIFManifestOptions): Record<string, unknown> {
   const canvases = options.canvases.map((image, index) =>
-    buildCanvas(image, index, options.prefix, options.hasImageService),
+    buildCanvas(image, index, options.prefix, options.hasImageService, options.hasAnnotations),
   )
 
   const manifest: Record<string, unknown> = {

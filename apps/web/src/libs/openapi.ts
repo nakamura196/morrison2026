@@ -132,7 +132,9 @@ export const openApiDocument = {
         description:
           '資料 (callNumber) の IIIF manifest を生成する。メタデータは `morrison_bib` から、' +
           'ページは media.toyobunko-lab.jp の clean PTIF を probe して列挙する。`version=3` で ' +
-          'Presentation 3 に変換、それ以外は v2。clean PTIF 未変換の資料は 404。',
+          'Presentation 3 に変換、それ以外は v2。clean PTIF 未変換の資料は 404。' +
+          '`has_fulltext=true` の資料は v3 manifest の各 canvas に annotation list 参照 (`annotations`) を付与し、' +
+          '`/annotations/{canvas}` で本文テキスト層を取得できる。',
         operationId: 'iiifManifest',
         parameters: [
           { $ref: '#/components/parameters/IiifVersionParam' },
@@ -182,11 +184,14 @@ export const openApiDocument = {
     '/api/iiif/{version}/{id}/annotations/{canvas}': {
       get: {
         tags: ['iiif'],
-        summary: 'IIIF annotations (canvas 単位) — プレースホルダ',
+        summary: 'IIIF annotations (canvas 単位) — 本文テキスト層',
         description:
-          '【未実装】1 canvas 分の IIIF Presentation 3 AnnotationPage を返す予定の枠。' +
-          '将来の翻刻 / NER オーバーレイ用に URL 形を予約してあり、現状は常に空 ' +
-          '(`items: []`) を返す。manifest への配線もまだ行っていない。',
+          '1 canvas 分の本文 (OCR/翻刻) を IIIF **Presentation 3 `AnnotationPage`** として返す ' +
+          '(各アノテーション `motivation: supplementing` + `TextualBody`)。テキスト層は v3 に統一しており、' +
+          '`:version` に関わらず v3 を返す。`has_fulltext` の資料の **v3 manifest** が各 canvas の ' +
+          '`annotations` からこの URL を参照する。`morrison` 索引に行 bbox (`coords.lines`) があれば行単位 ' +
+          '(`target` = `canvas#xywh=...`)、無ければページ全体の本文を canvas に対して 1 件返す ' +
+          '(行座標が無いページは当面ページ単位)。本文が無いページは空を返す。',
         operationId: 'iiifCanvasAnnotations',
         parameters: [
           { $ref: '#/components/parameters/IiifVersionParam' },
@@ -201,7 +206,7 @@ export const openApiDocument = {
         ],
         responses: {
           '200': {
-            description: 'IIIF Presentation 3 AnnotationPage (現状は空)',
+            description: 'IIIF Presentation 3 AnnotationPage',
             content: { 'application/json': { schema: { type: 'object', additionalProperties: true } } },
           },
         },
