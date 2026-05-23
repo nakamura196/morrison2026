@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { HiDownload, HiClipboard, HiClipboardCheck, HiLink } from 'react-icons/hi'
+import { HiClipboard, HiClipboardCheck, HiLink } from 'react-icons/hi'
 import { FaXTwitter, FaFacebook, FaLine } from 'react-icons/fa6'
+import { VscJson } from 'react-icons/vsc'
 
 interface ItemShareExportProps {
   itemId: string
@@ -10,14 +11,16 @@ interface ItemShareExportProps {
   pageUrl: string
   manifestUrl: string
   hasImages: boolean
-  itemJson: Record<string, unknown>
+  /** Whether the item has OCR fulltext — gates the TEI/XML download. */
+  hasFulltext: boolean
   citation: string
   labels: {
     heading: string
     exportGroup: string
     shareGroup: string
     citationGroup: string
-    jsonExport: string
+    jsonApiExport: string
+    teiExport: string
     iiifManifest: string
     copyLink: string
     copyCitation: string
@@ -34,7 +37,7 @@ export default function ItemShareExport({
   pageUrl,
   manifestUrl,
   hasImages,
-  itemJson,
+  hasFulltext,
   citation,
   labels,
 }: ItemShareExportProps) {
@@ -51,19 +54,13 @@ export default function ItemShareExport({
     }
   }
 
-  const handleJsonDownload = () => {
-    const blob = new Blob([JSON.stringify(itemJson, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${itemId}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+  // Download links resolve to documented API endpoints (see /api-docs):
+  //   JSON:API  -> GET /api/item/:id            (morrison_bib _source, wrapped)
+  //   TEI/XML   -> GET /api/dts/document?resource=:id (canonical TEI from S3)
+  // Both are same-origin so the `download` attribute applies the filename even
+  // though the endpoints already send Content-Disposition: attachment.
+  const jsonApiUrl = `/api/item/${encodeURIComponent(itemId)}`
+  const teiUrl = `/api/dts/document?resource=${encodeURIComponent(itemId)}`
 
   const encodedUrl = encodeURIComponent(pageUrl)
   const encodedTitle = encodeURIComponent(title)
@@ -169,10 +166,16 @@ export default function ItemShareExport({
             {labels.exportGroup}
           </h3>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={handleJsonDownload} className={btnBase}>
-              <HiDownload className="w-4 h-4" />
-              {labels.jsonExport}
-            </button>
+            <a href={jsonApiUrl} download={`${itemId}.json`} className={btnBase}>
+              <VscJson className="w-4 h-4" />
+              {labels.jsonApiExport}
+            </a>
+            {hasFulltext && (
+              <a href={teiUrl} download={`${itemId}.xml`} className={btnBase}>
+                <img src="/images/tei-logo.svg" alt="" className="w-4 h-4" />
+                {labels.teiExport}
+              </a>
+            )}
             {hasImages && (
               <a
                 href={manifestUrl}

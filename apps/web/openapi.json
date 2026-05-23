@@ -25,6 +25,10 @@
       "description": "DTS (Distributed Text Services) 1.0 API。TEI コーパスを標準仕様で公開する。Collection / Navigation は ES (morrison_bib / morrison)、Document の全文書 TEI は S3 の正本 (SigV2 署名 GET、NER・座標入り) を返す。S3 鍵未設定/対象未アップロード時は ES 本文から TEI を生成してフォールバック。仕様: https://dtsapi.org/specifications/versions/v1.0/"
     },
     {
+      "name": "item",
+      "description": "資料単位のメタデータエクスポート (JSON:API)"
+    },
+    {
       "name": "meta",
       "description": "API メタ情報"
     }
@@ -535,6 +539,45 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/DtsError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/item/{id}": {
+      "get": {
+        "tags": [
+          "item"
+        ],
+        "summary": "資料メタデータ (JSON:API)",
+        "description": "資料 1 件の書誌メタデータ (`morrison_bib` の `_source`) を JSON:API (`{ data: { type, id, attributes } }`) 形式で返す。`Content-Disposition: attachment` を付与するため、ブラウザでは `<id>.json` としてダウンロードされる。",
+        "operationId": "getItem",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CallNumberParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON:API リソースオブジェクト",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "資料が見つからない",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }

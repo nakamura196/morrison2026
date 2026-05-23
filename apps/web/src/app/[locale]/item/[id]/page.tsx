@@ -225,6 +225,12 @@ export default async function ItemPage({
   const omekaId = raw?.omeka_id as string | number | undefined
   const ocrPages = hasImages && omekaId != null ? await getOcrPages(omekaId) : []
 
+  // Fulltext availability gates the TEI/XML export. There's no `has_fulltext`
+  // field on morrison_bib yet (workflow §10 宿題), so derive it from whether any
+  // OCR page actually carries text — which is exactly what the DTS Document
+  // endpoint can serve.
+  const hasFulltext = ocrPages.some((p) => (p.text?.trim().length ?? 0) > 0)
+
   const pageUrl = `${siteUrl}/${locale}/item/${id}`
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {
     year: 'numeric',
@@ -363,14 +369,15 @@ export default async function ItemPage({
             pageUrl={pageUrl}
             manifestUrl={manifestUrl}
             hasImages={!!hasImages}
-            itemJson={raw ?? {}}
+            hasFulltext={hasFulltext}
             citation={citation}
             labels={{
               heading: t('shareExportHeading'),
               exportGroup: t('exportGroup'),
               shareGroup: t('shareGroup'),
               citationGroup: t('citationGroup'),
-              jsonExport: t('jsonExport'),
+              jsonApiExport: t('jsonApiExport'),
+              teiExport: t('teiExport'),
               iiifManifest: t('iiifManifest'),
               copyLink: t('copyLink'),
               copyCitation: t('copyCitation'),

@@ -38,6 +38,7 @@ export const openApiDocument = {
         'S3 の正本 (SigV2 署名 GET、NER・座標入り) を返す。S3 鍵未設定/対象未アップロード時は ' +
         'ES 本文から TEI を生成してフォールバック。仕様: https://dtsapi.org/specifications/versions/v1.0/',
     },
+    { name: 'item', description: '資料単位のメタデータエクスポート (JSON:API)' },
     { name: 'meta', description: 'API メタ情報' },
   ],
   paths: {
@@ -348,6 +349,33 @@ export const openApiDocument = {
           },
           '400': { description: '不正なパラメータ / 未対応 mediaType', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
           '404': { description: 'リソースが見つからない / 本文が無い / 範囲外', content: { 'application/problem+json': { schema: { $ref: '#/components/schemas/DtsError' } } } },
+        },
+      },
+    },
+
+    '/api/item/{id}': {
+      get: {
+        tags: ['item'],
+        summary: '資料メタデータ (JSON:API)',
+        description:
+          '資料 1 件の書誌メタデータ (`morrison_bib` の `_source`) を JSON:API ' +
+          '(`{ data: { type, id, attributes } }`) 形式で返す。`Content-Disposition: attachment` ' +
+          'を付与するため、ブラウザでは `<id>.json` としてダウンロードされる。',
+        operationId: 'getItem',
+        parameters: [{ $ref: '#/components/parameters/CallNumberParam' }],
+        responses: {
+          '200': {
+            description: 'JSON:API リソースオブジェクト',
+            content: {
+              'application/vnd.api+json': { schema: { type: 'object', additionalProperties: true } },
+            },
+          },
+          '404': {
+            description: '資料が見つからない',
+            content: {
+              'application/vnd.api+json': { schema: { type: 'object', additionalProperties: true } },
+            },
+          },
         },
       },
     },
