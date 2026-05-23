@@ -308,16 +308,19 @@ export default function BookViewer({
     return out
   }, [active, showAllOcr, activeQuery, matches])
 
+  // Reserve the viewer's full height even while the manifest is loading / when
+  // there are no images, so swapping the placeholder for the real viewer (or
+  // vice-versa) doesn't shift the rest of the page.
   if (serviceIds === null) {
     return (
-      <div className="mb-6 flex h-[40vh] items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mb-6 flex h-[calc(100vh-12rem)] min-h-[420px] items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
         {t('loading')}
       </div>
     )
   }
   if (pages.length === 0 || !active) {
     return (
-      <div className="mb-6 flex h-[40vh] items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mb-6 flex h-[calc(100vh-12rem)] min-h-[420px] items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
         {t('noImages')}
       </div>
     )
