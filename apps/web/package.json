@@ -50,7 +50,7 @@
     "swagger-ui-dist": "5.32.6",
     "tsx": "^4.19.0",
     "typescript": "5.8.3",
-    "wrangler": "^4.86.0"
+    "wrangler": "^4.104.0"
   },
   "optionalDependencies": {
     "@cloudflare/workerd-darwin-arm64": "^1.20260426.1"
