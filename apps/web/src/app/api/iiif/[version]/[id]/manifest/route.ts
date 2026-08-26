@@ -61,6 +61,56 @@ async function probeIIIF(serviceUrl: string): Promise<{ width: number; height: n
   }
 }
 
+/**
+ * v2 -> v3 変換で壊れた画像 URL を直す。
+ *
+ * IIIF Image API の識別子にスラッシュが含まれる場合、URL では %2F と
+ * 1 回だけエンコードする (例: morrison_p%2FP-III%2F...%2F0001.tif)。
+ * ところが @iiif/parser の convertPresentation2 は annotation body の
+ * id をもう一度エンコードしてしまい、%2F が %252F になる。
+ * その結果、画像そのものの URL が 404 を返す。
+ *
+ * 変換後も service 側の id は正しいままなので、それを手がかりに
+ * 「二重エンコードされていて、かつ 1 段戻すと service の id で始まる」
+ * ものだけを直す。判断できないものには触れない。
+ */
+function repairDoubleEncodedIds(manifest: unknown): unknown {
+  const asArray = (v: unknown): unknown[] =>
+    Array.isArray(v) ? v : v == null ? [] : [v]
+
+  const idOf = (v: unknown): string | undefined => {
+    if (typeof v !== 'object' || v === null) return undefined
+    const o = v as Record<string, unknown>
+    const id = o.id ?? o['@id']
+    return typeof id === 'string' ? id : undefined
+  }
+
+  const repair = (target: unknown, serviceId: string): void => {
+    if (typeof target !== 'object' || target === null) return
+    const o = target as Record<string, unknown>
+    if (typeof o.id !== 'string' || !o.id.includes('%25')) return
+    const decoded = o.id.replace(/%25/g, '%')
+    if (decoded.startsWith(serviceId)) o.id = decoded
+  }
+
+  for (const canvas of asArray((manifest as Record<string, unknown>)?.items)) {
+    for (const page of asArray((canvas as Record<string, unknown>)?.items)) {
+      for (const anno of asArray((page as Record<string, unknown>)?.items)) {
+        const body = (anno as Record<string, unknown>)?.body
+        const serviceId = asArray((body as Record<string, unknown>)?.service)
+          .map(idOf)
+          .find((v): v is string => typeof v === 'string')
+        if (!serviceId) continue
+        repair(body, serviceId)
+        for (const thumb of asArray((canvas as Record<string, unknown>)?.thumbnail)) {
+          repair(thumb, serviceId)
+        }
+      }
+    }
+  }
+  return manifest
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ version: string; id: string }> },
@@ -154,7 +204,7 @@ export async function GET(
   if (version === '3') {
     try {
       const { convertPresentation2 } = await import('@iiif/parser/presentation-2')
-      const converted = convertPresentation2(manifest)
+      const converted = repairDoubleEncodedIds(convertPresentation2(manifest))
       return new Response(JSON.stringify(converted), { headers: createIIIFHeaders() })
     } catch {
       // Fallback to v2 if parser not available
