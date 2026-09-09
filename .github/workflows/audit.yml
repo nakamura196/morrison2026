@@ -1,0 +1,35 @@
+name: audit
+
+# 週次の依存監査。PR が動いていない期間に公開された advisory を拾うための保険。
+# Dependabot alert (Security タブ / メール) を見落としても、ここで赤くなる。
+#
+# high 以上で失敗する。除外は scripts/audit.mjs の ALLOW に理由と期限つきで書く。
+# moderate 以下は Job Summary に出すだけで失敗させない。
+
+on:
+  schedule:
+    - cron: '0 22 * * 0' # JST 月曜 07:00
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Audit (high 以上で失敗)
+        run: node scripts/audit.mjs
+
+      - name: 参考情報 (moderate 以上の一覧。失敗させない)
+        if: always()
+        run: npm audit --audit-level=moderate >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
