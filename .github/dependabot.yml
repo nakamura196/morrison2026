@@ -10,7 +10,23 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # サプライチェーン攻撃対策: 公開直後のバージョンは取らない。
+    # 乗っ取られた版は数時間〜数日で検出・yank されるため、数日待つだけで大半を避けられる。
+    # security update (advisory 紐づき) は cooldown を無視して即時に来る。
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    # サプライチェーン攻撃対策: 公開直後のバージョンは取らない。
+    # 乗っ取られた版は数時間〜数日で検出・yank されるため、数日待つだけで大半を避けられる。
+    # security update (advisory 紐づき) は cooldown を無視して即時に来る。
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
