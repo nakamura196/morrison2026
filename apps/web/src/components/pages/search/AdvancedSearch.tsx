@@ -54,15 +54,21 @@ function Panel({
   const [draft, setDraft] = useState<Values>(applied)
 
   const submit = () => {
+    // 変わった項目だけを操作する。search-ui の絞り込みは 1 つずつ順に適用され、
+    // 変化の無い項目まで毎回消しにいくと、直前に入れた条件ごと流れてしまう。
     for (const f of FIELDS) {
-      const v = (draft[f.field] || '').trim()
-      if (v) setFilter?.(f.field, v, 'all')
+      const next = (draft[f.field] || '').trim()
+      const now = applied[f.field] || ''
+      if (next === now) continue
+      if (next) setFilter?.(f.field, next, 'all')
       else removeFilter?.(f.field)
     }
   }
 
   const clear = () => {
-    for (const f of FIELDS) removeFilter?.(f.field)
+    for (const f of FIELDS) {
+      if (applied[f.field]) removeFilter?.(f.field)
+    }
     setDraft({})
   }
 
