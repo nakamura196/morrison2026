@@ -9,10 +9,17 @@ const GA_TAG_ID = process.env.NEXT_PUBLIC_GA_ID || ''
 
 // Toyo Bunko web fonts. Phase 1: mirrors @toyo/design-system/fonts (inlined
 // until the design-system package is wired as a dependency).
+//
+// preload: false — Google splits the Japanese faces into ~120 unicode-range
+// files per weight, and next/font preloaded nearly all of them: 197 preload
+// links, 245 files / 5.7 MB on every page, which held back the page's JS (the
+// viewer started ~3.3 s in). Without preload the browser fetches only the
+// ranges the rendered text actually uses.
 const bizGothic = BIZ_UDPGothic({
   subsets: ['latin'],
   weight: ['400', '700'],
   display: 'swap',
+  preload: false,
   variable: '--font-biz-gothic',
 })
 
@@ -20,6 +27,7 @@ const bizMincho = BIZ_UDPMincho({
   subsets: ['latin'],
   weight: ['400', '700'],
   display: 'swap',
+  preload: false,
   variable: '--font-biz-mincho',
 })
 
@@ -27,6 +35,7 @@ const ebGaramond = EB_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
+  preload: false,
   variable: '--font-eb-garamond',
 })
 
