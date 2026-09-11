@@ -1,9 +1,10 @@
 /**
  * Fetch all items from Omeka S API and convert to ES bulk format
  *
- * Usage: npx tsx scripts/fetch-omeka.ts
+ * Usage: op run --env-file=apps/web/.env.local -- npx tsx scripts/fetch-omeka.ts
  *
- * Requires: OMEKA_BASE_URL, OMEKA_USER, OMEKA_PASSWORD in .env.local
+ * Requires: OMEKA_BASE_URL, OMEKA_USER, OMEKA_PASSWORD. The credentials are
+ * op:// references in apps/web/.env.local, resolved by `op run`.
  */
 
 import * as fs from 'fs'
@@ -18,7 +19,11 @@ try {
       const trimmed = line.trim()
       if (trimmed && !trimmed.startsWith('#')) {
         const [key, ...valueParts] = trimmed.split('=')
-        process.env[key.trim()] = valueParts.join('=').trim()
+        const value = valueParts.join('=').trim()
+        // Values already in the environment (resolved by `op run`) win, and an
+        // unresolved op:// reference is never used as a credential.
+        if (key.trim() in process.env || value.startsWith('op://')) continue
+        process.env[key.trim()] = value
       }
     }
   }
