@@ -72,13 +72,21 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    // The font variables go on <html>: globals.css reads them in @theme, which
+    // Tailwind emits on :root. On <body> they were undefined at :root, so the
+    // whole --font-sans/--font-serif declaration was invalid and the site fell
+    // back to the system font.
+    <html
+      lang={locale}
+      className={`${bizGothic.variable} ${bizMincho.variable} ${ebGaramond.variable}`}
+      suppressHydrationWarning
+    >
       <head>{GA_TAG_ID ? (
         <Suspense>
           <GoogleAnalytics gaTagId={GA_TAG_ID} />
         </Suspense>
       ) : null}</head>
-      <body className={`${bizGothic.variable} ${bizMincho.variable} ${ebGaramond.variable} font-sans`}>
+      <body className="font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
