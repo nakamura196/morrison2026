@@ -11,6 +11,7 @@
 #   - magick       : image size report at the end
 #
 # Sources : apps/web/assets/branding/opengraph-image.svg
+#           (+ toyobunko-logo.png, the 512px copy of the shared logo it embeds)
 # Outputs : apps/web/src/app/{opengraph-image.png,twitter-image.png}
 # Next.js picks these up via file-based metadata conventions.
 #
