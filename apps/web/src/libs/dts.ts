@@ -41,12 +41,13 @@ export const TEI_BASE = (process.env.MORRISON_TEI_BASE || '').replace(/\/+$/, ''
 export const MEDIA_TYPE_TEI = 'application/tei+xml'
 
 /**
- * IIIF Image API base for page images (same clean PTIF served by Cantaloupe via
- * media.toyobunko-lab.jp as the IIIF manifest route). Used to wire `<graphic>`
- * in the generated TEI facsimile. The image identifier is
- * `morrison_p/<group>/<callNumber>/<NNNN>.tif`.
+ * ページ画像の IIIF Image API のベース URL。manifest と同じ配信元
+ * (東洋文庫の画像サーバ img.toyobunko-lab.jp) を使う。生成する TEI facsimile の
+ * `<graphic>` に差し込むためのもの。識別子は
+ * `morrison_p/<group>/<callNumber>/<NNNN>.tif`。
  */
-export const MEDIA_IIIF_BASE = (process.env.MORRISON_MEDIA_IIIF_BASE || 'https://media.toyobunko-lab.jp/iiif/3').replace(/\/+$/, '')
+import { IMAGE_IIIF_BASE, FULL_SIZE, imageServiceUrl as buildImageServiceUrl } from './iiif-image'
+export const MEDIA_IIIF_BASE = IMAGE_IIIF_BASE
 
 /** IIIF Presentation version used when referencing canvas / manifest URIs from the TEI. */
 export const IIIF_VERSION = '3'
@@ -252,10 +253,13 @@ export interface FacsimileOptions {
   pageCount: number
 }
 
-/** IIIF Image API service URL for one page (zero-padded to 4), identifier %2F-encoded. */
-function imageServiceUrl(group: string, callNumber: string, page: number): string {
-  const ident = `morrison_p/${group}/${callNumber}/${String(page).padStart(4, '0')}.tif`
-  return `${MEDIA_IIIF_BASE}/${encodeURIComponent(ident)}`
+/**
+ * ページ画像の IIIF Image API サービス URL。
+ * 組み立ては libs/iiif-image.ts に集約している (区切りのスラッシュはそのまま書く)。
+ * `group` は callNumber から導けるので受け取らない。
+ */
+function imageServiceUrl(_group: string, callNumber: string, page: number): string {
+  return buildImageServiceUrl(callNumber, page)
 }
 
 /** IIIF Presentation canvas URI matching the /api/iiif manifest route (`.../canvas/p<N>`). */
@@ -280,7 +284,7 @@ function buildFacsimile(callNumber: string, opts: FacsimileOptions): string {
     const svc = imageServiceUrl(opts.group, callNumber, n)
     surfaces.push(
       `    <surface xml:id="f${n}" n="${n}" sameAs="${xmlEscape(canvasUri(opts.host, callNumber, n))}">\n` +
-        `      <graphic url="${xmlEscape(svc)}/full/max/0/default.jpg" sameAs="${xmlEscape(svc)}/info.json"/>\n` +
+        `      <graphic url="${xmlEscape(svc)}/full/${FULL_SIZE}/0/default.jpg" sameAs="${xmlEscape(svc)}/info.json"/>\n` +
         `    </surface>`,
     )
   }

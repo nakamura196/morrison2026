@@ -4,7 +4,7 @@
  * GET /api/iiif/:version/:id/manifest   (id = callNumber)
  *
  * Metadata comes from the morrison_bib ES index. Pages are enumerated by
- * probing the clean PTIF served from s3ds via media.toyobunko-lab.jp
+ * probing the PTIF served from the Toyo Bunko image server img.toyobunko-lab.jp
  * (identifier `morrison_p/<group>/<callNumber>/<NNNN>.tif`). No Omeka — the
  * legacy `/api/media` dependency is gone, so the manifest no longer needs the
  * (now auth-gated, being-decommissioned) Omeka instance.
@@ -22,33 +22,18 @@ import {
   type IIIFCanvasImage,
 } from '@toyo/shared-lib'
 import { ensureEnv } from '@/libs/cf-env'
+import { FULL_SIZE, imageServiceUrl } from '@/libs/iiif-image'
 
 export const revalidate = 3600
 
 const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
-
-// Clean PTIF on s3ds, served by Cantaloupe via media.toyobunko-lab.jp.
-// PATH_PREFIX=files/ on the server, so the identifier is
-// `morrison_p/<group>/<callNumber>/<NNNN>.tif`.
-const MEDIA_BASE = (process.env.MORRISON_MEDIA_IIIF_BASE || 'https://media.toyobunko-lab.jp/iiif/3').replace(/\/+$/, '')
 
 // Page enumeration: probe pages concurrently in batches, stop when a whole
 // batch is absent. Gaps smaller than the batch are tolerated.
 const PROBE_BATCH = 8
 const MAX_PAGES = 800
 
-/** Group folder = first two hyphen-segments of the callNumber (`P-III-a-0083` → `P-III`). */
-function deriveGroup(callNumber: string): string {
-  return callNumber.split('-').slice(0, 2).join('-')
-}
-
-/** media. (clean PTIF) IIIF service URL for one page (zero-padded to 4). */
-function mediaServiceUrl(group: string, callNumber: string, page: number): string {
-  const ident = `morrison_p/${group}/${callNumber}/${String(page).padStart(4, '0')}.tif`
-  return `${MEDIA_BASE}/${encodeURIComponent(ident)}`
-}
-
-/** Fetch a Cantaloupe info.json; returns dims when the page exists, else null. */
+/** Fetch the image server's info.json; returns dims when the page exists, else null. */
 async function probeIIIF(serviceUrl: string): Promise<{ width: number; height: number } | null> {
   try {
     const res = await fetch(`${serviceUrl}/info.json`, { next: { revalidate: 86400 } })
@@ -135,14 +120,13 @@ export async function GET(
   }
 
   const callNumber = (item.callNumber as string) || id
-  const group = deriveGroup(callNumber)
 
-  // Enumerate pages from the clean PTIF on media. in concurrent batches.
+  // Enumerate pages from the PTIF on the image server, in concurrent batches.
   const canvases: IIIFCanvasImage[] = []
   for (let start = 1; start <= MAX_PAGES; start += PROBE_BATCH) {
     const batch = await Promise.all(
       Array.from({ length: PROBE_BATCH }, (_, k) => {
-        const serviceUrl = mediaServiceUrl(group, callNumber, start + k)
+        const serviceUrl = imageServiceUrl(callNumber, start + k)
         return probeIIIF(serviceUrl).then(dims => ({ serviceUrl, dims }))
       }),
     )
@@ -151,7 +135,7 @@ export async function GET(
       if (!b.dims) continue
       any = true
       canvases.push({
-        imageUrl: `${b.serviceUrl}/full/max/0/default.jpg`,
+        imageUrl: `${b.serviceUrl}/full/${FULL_SIZE}/0/default.jpg`,
         serviceUrl: b.serviceUrl,
         width: b.dims.width,
         height: b.dims.height,

@@ -1,29 +1,21 @@
 /**
- * Clean PTIF thumbnails served from s3ds via Cantaloupe (media.toyobunko-lab.jp).
+ * 検索結果などで出すサムネイル。
  *
- * Thumbnails are derived from the callNumber + page (no Omeka), so they survive
- * ES rebuilds and need no stored `thumbnail_urls`. Identifier mirrors the
- * manifest route: `morrison_p/<group>/<callNumber>/<NNNN>.tif`.
+ * 画像は東洋文庫の画像サーバ (img.toyobunko-lab.jp) が配信する PTIF から
+ * その場で切り出す。請求記号とページ番号だけで URL が決まるので、ES を
+ * 作り直しても影響を受けず、`thumbnail_urls` を持たなくてよい。
  *
- * NEXT_PUBLIC_ prefix so client components (search UI) can use it too.
+ * URL の組み立ては libs/iiif-image.ts に集約している。
  */
-const MEDIA_IIIF_BASE = (
-  process.env.NEXT_PUBLIC_MEDIA_IIIF_BASE || 'https://media.toyobunko-lab.jp/iiif/3'
-).replace(/\/+$/, '')
+import { PUBLIC_IMAGE_IIIF_BASE, imageIdentifier, imageServiceUrl } from './iiif-image'
 
-/** s3ds clean-PTIF identifier for a page (default page 1). */
-export function mediaImageId(callNumber: string, page: number | string = 1): string {
-  const group = callNumber.split('-').slice(0, 2).join('-')
-  const nnnn = String(page).padStart(4, '0')
-  return `morrison_p/${group}/${callNumber}/${nnnn}.tif`
-}
+export { imageIdentifier as mediaImageId }
 
 /**
- * IIIF thumbnail URL for one page of an item's clean PTIF.
- * `size` is the bounding box (Cantaloupe `full/!{size},{size}`).
- * Returns '' when callNumber is missing so callers can conditionally render.
+ * 1 ページ分のサムネイル URL。`size` は収まる箱の一辺 (`full/!{size},{size}`)。
+ * 請求記号が無いときは空文字を返し、呼び出し側で出し分けられるようにする。
  */
 export function mediaThumbUrl(callNumber: string | undefined, page: number | string = 1, size = 300): string {
   if (!callNumber) return ''
-  return `${MEDIA_IIIF_BASE}/${encodeURIComponent(mediaImageId(callNumber, page))}/full/!${size},${size}/0/default.jpg`
+  return `${imageServiceUrl(callNumber, page, PUBLIC_IMAGE_IIIF_BASE)}/full/!${size},${size}/0/default.jpg`
 }

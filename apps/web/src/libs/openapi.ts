@@ -131,7 +131,7 @@ export const openApiDocument = {
         summary: 'IIIF Presentation manifest',
         description:
           '資料 (callNumber) の IIIF manifest を生成する。メタデータは `morrison_bib` から、' +
-          'ページは media.toyobunko-lab.jp の clean PTIF を probe して列挙する。`version=3` で ' +
+          'ページは img.toyobunko-lab.jp の PTIF を probe して列挙する。`version=3` で ' +
           'Presentation 3 に変換、それ以外は v2。clean PTIF 未変換の資料は 404。' +
           '`has_fulltext=true` の資料は v3 manifest の各 canvas に annotation list 参照 (`annotations`) を付与し、' +
           '`/annotations/{canvas}` で本文テキスト層を取得できる。',
