@@ -40,14 +40,17 @@ morrison/
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22 (LTS) — the version CI and deploy use; `nvm use` picks it up from `.nvmrc`
 - npm 10+
 
 ### Setup
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies.
+# --ignore-scripts: without it, sharp's install script tries to build from
+# source (needs node-gyp) and aborts the whole install. The prebuilt binary
+# (@img/sharp-*) still loads fine at runtime (checked on Node 25).
+npm ci --ignore-scripts
 
 # Copy and configure environment variables
 cp apps/web/.env.example apps/web/.env.local
