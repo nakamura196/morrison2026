@@ -1,5 +1,6 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { highlightFields } from '@/config/search'
+import { buildBaseQuery, buildFilterClauses, type Filter } from '@/libs/search-query'
 
 export const runtime = 'nodejs'
 
@@ -14,11 +15,6 @@ function readEnv(key: string): string {
     // not in the cloudflare runtime (local dev / build)
   }
   return process.env[key] || ''
-}
-
-type Filter = {
-  field: string
-  values: (number | string | boolean)[]
 }
 
 type QueryConfig = {
@@ -75,30 +71,6 @@ function convertNumericBooleansInFilters(filters: Filter[]): Filter[] {
     }
     return filter
   })
-}
-
-// Build base query (search term only, no filters)
-function buildBaseQuery(searchTerm: string, searchFields: string[]) {
-  if (searchTerm && searchTerm.trim()) {
-    return {
-      multi_match: {
-        query: searchTerm,
-        fields: searchFields,
-        type: 'phrase',
-        analyzer: 'standard',
-      },
-    }
-  }
-  return { match_all: {} }
-}
-
-// Build filter clauses excluding a specific field
-function buildFilterClauses(filters: Filter[], excludeField?: string) {
-  return filters
-    .filter((f) => f.field !== excludeField)
-    .map((f) => ({
-      terms: { [f.field]: f.values },
-    }))
 }
 
 // Direct ES query search
