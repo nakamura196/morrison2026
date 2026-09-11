@@ -8,13 +8,25 @@ import type { FacetOption, SearchUITranslations, ThemeColor } from './types'
 
 export default function Filters({
   fields,
+  extraLabels,
   t,
   themeColor = 'amber',
 }: {
   fields: FacetOption[]
+  /** ファセット以外の絞り込み項目の見出し (項目名 → 表示名)。 */
+  extraLabels?: Record<string, string>
   t: SearchUITranslations
   themeColor?: ThemeColor
 }) {
+  /**
+   * 絞り込み項目の見出しを決める。
+   *
+   * ファセット以外の項目 (タイトルなど自由入力で絞り込むもの) は facetOptions に
+   * 無いため、以前はここが空欄になり `: travel` とだけ表示されていた。
+   * ファセット → 呼び出し側が渡した名前 → 項目名そのもの、の順に引く。
+   */
+  const labelOf = (field: string): string =>
+    fields.find(f => f.field === field)?.label ?? extraLabels?.[field] ?? field
   const translateValue = (value: FilterValue): string => {
     if (value === 1) return t.yes
     if (value === 0) return t.no
@@ -93,7 +105,7 @@ export default function Filters({
                   }}
                 >
                   <span className={colorClasses.label}>
-                    {fields.find((f) => f.field === filter.field)?.label}:
+                    {labelOf(filter.field)}:
                   </span>
                   <span>{translateValue(value)}</span>
                   <HiXCircle className={`w-4 h-4 ${colorClasses.icon} opacity-75 group-hover:opacity-100 transition-opacity duration-200`} />

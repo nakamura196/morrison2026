@@ -11,7 +11,7 @@ import { SearchUI, SearchBox } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import { searchFields, resultFields } from '@/config/search'
 import Thumb from '@/components/ui/Thumb'
-import AdvancedSearch from './AdvancedSearch'
+import AdvancedSearch, { advancedFilterLabels } from './AdvancedSearch'
 import { SORT_OPTIONS, SORT_FIELD_CALL_NUMBER, parseSortValue, toSortValue } from '@/libs/sort-options'
 import { mediaThumbUrl } from '@/libs/media-image'
 
@@ -468,6 +468,7 @@ export default function SearchContent() {
           t={translations}
           themeColor="amber"
           sortField={SORT_FIELD_CALL_NUMBER}
+          filterLabels={advancedFilterLabels(tSearch)}
         >
           {{
             searchForm: (

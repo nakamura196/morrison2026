@@ -19,6 +19,7 @@ const SearchUI = ({
   t,
   themeColor = 'amber',
   sortField,
+  filterLabels,
 }: {
   facetOptions: FacetOption[];
   searchFields: Record<string, object>;
@@ -32,6 +33,8 @@ const SearchUI = ({
   t: SearchUITranslations;
   themeColor?: ThemeColor;
   sortField?: string;
+  /** ファセット以外の絞り込み項目の見出し (項目名 → 表示名)。 */
+  filterLabels?: Record<string, string>;
 }) => {
   const facetsConfig: {
     [key: string]: {
@@ -78,7 +81,7 @@ const SearchUI = ({
 
         {/* フィルター */}
         <div className="w-full">
-          <Filters fields={facetOptions} t={t} themeColor={themeColor} />
+          <Filters fields={facetOptions} extraLabels={filterLabels} t={t} themeColor={themeColor} />
         </div>
 
         {/* ファセット */}
