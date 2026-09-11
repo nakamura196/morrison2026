@@ -59,7 +59,7 @@ export const openApiDocument = {
               examples: {
                 keyword: {
                   summary: 'キーワード検索',
-                  value: { state: { searchTerm: '日本', current: 1, resultsPerPage: 20 } },
+                  value: { state: { searchTerm: '日本', current: 1, resultsPerPage: 24 } },
                 },
               },
             },
@@ -493,7 +493,7 @@ export const openApiDocument = {
         properties: {
           searchTerm: { type: 'string' },
           current: { type: 'integer', minimum: 1, default: 1, description: '1 始まりのページ番号' },
-          resultsPerPage: { type: 'integer', default: 20 },
+          resultsPerPage: { type: 'integer', default: 24 },
           filters: { type: 'array', items: { $ref: '#/components/schemas/SearchFilter' } },
           sortField: { type: 'string' },
           sortDirection: { type: 'string', enum: ['asc', 'desc'] },

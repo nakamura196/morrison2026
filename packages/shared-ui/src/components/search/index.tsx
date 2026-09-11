@@ -3,7 +3,7 @@
 import { SearchProvider } from '@elastic/react-search-ui';
 import type { APIConnector } from '@elastic/search-ui';
 
-import CustomResultPerPage from './ResultsPerPage';
+import CustomResultPerPage, { DEFAULT_RESULTS_PER_PAGE } from './ResultsPerPage';
 import PagingInfo from './PagingInfo';
 import Facets from './Facets';
 import Filters from './Filters';
@@ -63,10 +63,11 @@ const SearchUI = ({
       facets: facetsConfig,
       disjunctiveFacets,
     },
-    initialState: sortField ? {
-      sortDirection: 'asc' as const,
-      sortField,
-    } : {},
+    // 件数を指定しないと Search UI の既定の 20 件になり、選択肢と食い違う。
+    initialState: {
+      resultsPerPage: DEFAULT_RESULTS_PER_PAGE,
+      ...(sortField ? { sortDirection: 'asc' as const, sortField } : {}),
+    },
   };
 
   return (

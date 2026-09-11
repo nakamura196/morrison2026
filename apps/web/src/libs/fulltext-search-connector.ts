@@ -40,9 +40,9 @@ export class FulltextSearchConnector implements APIConnector {
       requestId: data.requestId || '',
       facets: data.facets || {},
       resultSearchTerm: state.searchTerm || '',
-      pagingStart: ((state.current || 1) - 1) * (state.resultsPerPage || 20) + 1,
+      pagingStart: ((state.current || 1) - 1) * (state.resultsPerPage || 24) + 1,
       pagingEnd: Math.min(
-        ((state.current || 1) - 1) * (state.resultsPerPage || 20) + (data.results?.length || 0),
+        ((state.current || 1) - 1) * (state.resultsPerPage || 24) + (data.results?.length || 0),
         data.totalResults || 0,
       ),
       wasSearched: true,

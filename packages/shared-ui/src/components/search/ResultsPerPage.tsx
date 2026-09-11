@@ -9,6 +9,11 @@ interface ResultsPerPageContext {
   themeColor: ThemeColor;
 }
 
+// 一覧表示の列数 (2・3・4・6 列) で割り切れるよう、12 の倍数にしている。
+// 端数の行ができると、最後の行だけ歯抜けに見える。
+export const RESULTS_PER_PAGE_OPTIONS = [24, 48, 96];
+export const DEFAULT_RESULTS_PER_PAGE = RESULTS_PER_PAGE_OPTIONS[0];
+
 const ResultsPerPageContext = createContext<ResultsPerPageContext>({
   t: {} as SearchUITranslations,
   themeColor: 'amber',
@@ -16,8 +21,8 @@ const ResultsPerPageContext = createContext<ResultsPerPageContext>({
 
 const CustomView = ({
   onChange,
-  options = [10, 20, 50, 100, 500],
-  value = 10,
+  options = RESULTS_PER_PAGE_OPTIONS,
+  value = DEFAULT_RESULTS_PER_PAGE,
 }: {
   onChange: (value: number) => void;
   options?: number[];
@@ -90,10 +95,9 @@ const ResultsPerPage = ({
   t: SearchUITranslations;
   themeColor?: ThemeColor;
 }) => {
-  const options = [10, 20, 50, 100, 500];
   return (
     <ResultsPerPageContext.Provider value={{ t, themeColor }}>
-      <ResultsPerPageComponent options={options} view={CustomView} />
+      <ResultsPerPageComponent options={RESULTS_PER_PAGE_OPTIONS} view={CustomView} />
     </ResultsPerPageContext.Provider>
   );
 };

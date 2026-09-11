@@ -204,7 +204,7 @@ export default async function ItemPage({
   if (resolvedSearchParams.page && resolvedSearchParams.page !== '1') {
     searchUrlParams.set('current', `n_${resolvedSearchParams.page}_n`)
   }
-  if (resolvedSearchParams.size && resolvedSearchParams.size !== '20') {
+  if (resolvedSearchParams.size && resolvedSearchParams.size !== '24') {
     searchUrlParams.set('size', `n_${resolvedSearchParams.size}_n`)
   }
   if (resolvedSearchParams.filters) {

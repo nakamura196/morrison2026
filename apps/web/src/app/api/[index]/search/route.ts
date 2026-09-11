@@ -75,7 +75,7 @@ function convertNumericBooleansInFilters(filters: Filter[]): Filter[] {
 
 // Direct ES query search
 async function directSearch(host: string, index: string, state: State, queryConfig: QueryConfig) {
-  const { current = 1, resultsPerPage = 20, searchTerm = '', filters = [], sortField, sortDirection } = state
+  const { current = 1, resultsPerPage = 24, searchTerm = '', filters = [], sortField, sortDirection } = state
   const from = (current - 1) * resultsPerPage
   const searchFields = Object.keys(queryConfig.search_fields || {})
   const disjunctiveFacets = queryConfig.disjunctiveFacets || []

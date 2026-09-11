@@ -184,7 +184,7 @@ export default function FulltextSearch() {
       disjunctiveFacets: ['item_title', 'ne_persName', 'ne_placeName', 'ne_orgName', 'ne_date'],
     },
     initialState: {
-      resultsPerPage: 20,
+      resultsPerPage: 24,
       sortField: 'appearance',
       sortDirection: 'asc' as const,
     },

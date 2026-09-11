@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
 
   const searchTerm = state.searchTerm || ''
   const current = state.current || 1
-  const resultsPerPage = state.resultsPerPage || 20
+  const resultsPerPage = state.resultsPerPage || 24
   const from = (current - 1) * resultsPerPage
 
   const sort = buildSortConfig(searchTerm, state.sortField, state.sortDirection)
