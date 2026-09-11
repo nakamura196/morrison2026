@@ -10,5 +10,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    server: {
+      deps: {
+        // next-intl's ESM build imports `next/server` without an extension,
+        // which Node's strict ESM resolver rejects. Let Vite resolve it instead.
+        inline: ['next-intl'],
+      },
+    },
   },
 })

@@ -1,11 +1,8 @@
 import { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-const intlMiddleware = createMiddleware({
-  locales: ['ja', 'en'],
-  defaultLocale: 'ja',
-  localePrefix: 'as-needed',
-});
+const intlMiddleware = createMiddleware(routing);
 
 export function middleware(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

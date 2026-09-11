@@ -10,6 +10,12 @@ export const routing = defineRouting({
 
   // Default locale is accessible without prefix
   localePrefix: 'as-needed',
+
+  // The URL alone decides the language: /en/... is English, everything else
+  // is Japanese. With detection on, the NEXT_LOCALE cookie redirected
+  // unprefixed URLs to /en — and link prefetches of /en/... pages rewrote
+  // that cookie right after switching to Japanese, bouncing users back.
+  localeDetection: false,
 })
 
 // Lightweight wrappers around Next.js' navigation APIs
