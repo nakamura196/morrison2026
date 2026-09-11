@@ -17,7 +17,7 @@ const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
 /**
  * ヒットしたページのサムネ URL。s3ds のクリーンPTIF
- * (`morrison_p/<group>/<callNumber>/<NNNN>.tif`) を media.toyobunko-lab.jp の
+ * (`morrison_p/<group>/<callNumber>/<NNNN>.tif`) を img.toyobunko-lab.jp の
  * Cantaloupe で配信。Omeka 非依存(mediaThumbUrl が identifier を組み立てる)。
  */
 function buildPageThumbnailUrl(callNumber: string, page: string | number): string {

@@ -10,7 +10,9 @@
     "dev": "npm run dev --workspace=@morrison/web",
     "build": "npm run build --workspace=@morrison/web",
     "start": "npm run start --workspace=@morrison/web",
-    "lint": "npm run lint --workspace=@morrison/web"
+    "lint": "npm run lint --workspace=@morrison/web",
+    "test": "npm run test --workspace=@morrison/web",
+    "typecheck": "npm run typecheck --workspace=@morrison/web"
   },
   "overrides": {
     "@types/react": "19.1.2",
