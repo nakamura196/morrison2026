@@ -83,3 +83,41 @@ test.describe('並び替え', () => {
     await expect(page.locator('#sort-select')).toHaveValue('callNumber_converted_asc')
   })
 })
+
+test.describe('項目別の絞り込みが実際に効く', () => {
+  // 日本語の画面で確かめる。「項目を指定して絞り込む」と「絞り込む」が
+  // 紛らわしいのは日本語だけで、英語 (Search by field / Apply) では起きない。
+  // 既定のブラウザは英語で開くため、言語を明示する。
+  test.use({ locale: 'ja-JP', extraHTTPHeaders: { 'Accept-Language': 'ja' } })
+
+  // 検索結果の取得には Elasticsearch が要る。ローカルに立てたサーバを見るときは
+  // 検索 API だけ本番へ流して、画面の側の動きを確かめる。
+  test.beforeEach(async ({ page, baseURL }) => {
+    if (baseURL?.includes('localhost')) {
+      await page.route('**/api/*/search', async route => {
+        const res = await route.fetch({ url: 'https://morrison.toyobunko-lab.jp/api/morrison_bib/search' })
+        await route.fulfill({ response: res })
+      })
+    }
+  })
+
+  test('入力して押すと条件が付き、URL にも残る', async ({ page }) => {
+    // 検索 API を外へ流しているぶん読み込みが遅い。画面が組み上がった時点で進める。
+    await page.goto('/search', { waitUntil: 'domcontentloaded' })
+    await page.getByRole('button', { name: /項目を指定して絞り込む/ }).click()
+    await page.getByLabel('タイトル', { exact: true }).fill('travel')
+
+    // 「項目を指定して絞り込む」にも同じ語が含まれるので、名前がちょうど一致する
+    // ボタンを押す。部分一致で拾うと開閉ボタンのほうを押してしまう。
+    const requested = page.waitForRequest(
+      req => req.url().includes('/search') && req.method() === 'POST' &&
+             (req.postData() || '').includes('"field":"title"'),
+      { timeout: 15_000 },
+    )
+    await page.getByRole('button', { name: '絞り込む', exact: true }).click()
+    await requested
+
+    await expect(page).toHaveURL(/filters%5B0%5D%5Bfield%5D=title/)
+    await expect(page.locator('button', { hasText: 'travel' }).first()).toContainText('タイトル')
+  })
+})
