@@ -8,6 +8,7 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { createHeaders } from '@/libs/api'
 import { esSearch } from '@toyo/shared-lib'
 import { Link } from '@/i18n/routing'
+import { itemUrl } from '@/libs/canonical-url'
 import type { MorrisonItem } from '@/types/morrison'
 import ItemViewer from '@/components/pages/item/ItemViewer'
 import type { OcrPage } from '@/components/pages/item/BookViewer'
@@ -228,7 +229,7 @@ export default async function ItemPage({
   // endpoint can serve.
   const hasFulltext = ocrPages.some((p) => (p.text?.trim().length ?? 0) > 0)
 
-  const pageUrl = `${siteUrl}/${locale}/item/${id}`
+  const pageUrl = itemUrl(siteUrl, locale, id)
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {
     year: 'numeric',
     month: 'long',
