@@ -11,6 +11,8 @@ import { SearchUI, SearchBox } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import { searchFields, resultFields } from '@/config/search'
 import Thumb from '@/components/ui/Thumb'
+import AdvancedSearch from './AdvancedSearch'
+import { SORT_OPTIONS, SORT_FIELD_CALL_NUMBER, parseSortValue, toSortValue } from '@/libs/sort-options'
 import { mediaThumbUrl } from '@/libs/media-image'
 
 type ViewMode = 'list' | 'grid'
@@ -86,15 +88,11 @@ function SortSelector() {
       })}
     >
       {({ sortField, sortDirection, setSort }: Partial<SearchContextState>) => {
-        const currentSort = sortField ? `${sortField}_${sortDirection}` : 'callNumber_asc'
+        const currentSort = toSortValue(sortField, sortDirection)
 
         const handleSortChange = (value: string) => {
-          if (value === 'relevance') {
-            setSort?.('', 'asc')
-          } else {
-            const [field, direction] = value.split('_')
-            setSort?.(field, direction as 'asc' | 'desc')
-          }
+          const { field, direction } = parseSortValue(value)
+          setSort?.(field, direction)
         }
 
         return (
@@ -109,15 +107,9 @@ function SortSelector() {
                 onChange={(e) => handleSortChange(e.target.value)}
                 className="appearance-none pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20 focus:border-amber-500 dark:focus:border-amber-400 cursor-pointer transition-all duration-200 text-sm font-medium shadow-sm"
               >
-                <option value="callNumber_asc">{t('sortCallNumberAsc')}</option>
-                <option value="callNumber_desc">{t('sortCallNumberDesc')}</option>
-                <option value="relevance">{t('sortRelevance')}</option>
-                <option value="title.keyword_asc">{t('sortTitleAsc')}</option>
-                <option value="title.keyword_desc">{t('sortTitleDesc')}</option>
-                <option value="heading1.keyword_asc">{t('sortAuthorAsc')}</option>
-                <option value="heading1.keyword_desc">{t('sortAuthorDesc')}</option>
-                <option value="publication_year_asc">{t('sortYearAsc')}</option>
-                <option value="publication_year_desc">{t('sortYearDesc')}</option>
+                {SORT_OPTIONS.map(o => (
+                  <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
+                ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -475,10 +467,15 @@ export default function SearchContent() {
           connector={connector}
           t={translations}
           themeColor="amber"
-          sortField="callNumber"
+          sortField={SORT_FIELD_CALL_NUMBER}
         >
           {{
-            searchForm: <SearchBox t={translations} themeColor="amber" showSearchButton />,
+            searchForm: (
+              <>
+                <SearchBox t={translations} themeColor="amber" showSearchButton />
+                <AdvancedSearch t={tSearch} />
+              </>
+            ),
             customControls: <CustomPagingInfo viewMode={viewMode} onViewModeChange={setViewMode} />,
             results: <Results viewMode={viewMode} />,
           }}

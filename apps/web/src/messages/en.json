@@ -81,7 +81,17 @@
     "quotationEnd": "\"",
     "searching": "Searching...",
     "facetSearchPlaceholder": "Filter...",
-    "maxResultsNote": "(Limited to first 10,000 results)"
+    "maxResultsNote": "(Limited to first 10,000 results)",
+    "advancedSearch": "Search by field",
+    "advApplied": "applied",
+    "advTitle": "Title",
+    "advAuthor": "Author",
+    "advPublication": "Publication",
+    "advCallNumber": "Call number",
+    "advCallNumberHint": "e.g. P-III-a (a prefix is enough)",
+    "advNote": "Narrows to records containing all the words you enter. Call number matches by prefix. Can be combined with the keyword box.",
+    "advApply": "Apply",
+    "advClear": "Clear"
   },
   "ItemPage": {
     "loading": "Loading...",
