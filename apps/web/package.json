@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@elastic/react-search-ui": "^1.24.2",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "1.19.9",
+    "@playwright/test": "1.63.0",
     "@types/node": "22.15.3",
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",

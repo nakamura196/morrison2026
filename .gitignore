@@ -75,3 +75,7 @@ scripts/tmp/
 out.zip
 Thumbs.db
 .env*.local
+
+# playwright
+/apps/web/test-results/
+/apps/web/playwright-report/
