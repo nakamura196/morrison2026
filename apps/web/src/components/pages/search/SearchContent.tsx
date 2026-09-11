@@ -145,7 +145,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
       })}
     >
       {(props: Partial<SearchContextState>) => {
-        const { isLoading, searchTerm, current = 1, resultsPerPage = 20, filters = [] } = props
+        const { isLoading, searchTerm, current = 1, resultsPerPage = 24, filters = [] } = props
         const results = (props.results || []) as SearchResult[]
         if (isLoading) {
           return (
@@ -166,7 +166,7 @@ function Results({ viewMode }: { viewMode: ViewMode }) {
         // Grid view
         if (viewMode === 'grid') {
           return (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
               {results.map((result, index) => {
                 const title = result.title?.raw || ''
                 const author = result.heading1?.raw
