@@ -130,6 +130,9 @@ const OpenSeadragonViewer = forwardRef<ViewerApi, ViewerProps>(function OpenSead
         // Default maxZoomPixelRatio (1.1) caps fitBounds so a small region
         // can't fill the viewport. Bump it so zoomToBox can frame one line.
         maxZoomPixelRatio: 8,
+        // The default (1) queues one new tile per frame, so a Retina-sized
+        // view (~180 tiles) took ~4 s to fill even after the tiles arrived.
+        maxTilesPerFrame: 10,
       })
       viewerRef.current = v
       // OSD's viewport is only valid after the tile source opens.
