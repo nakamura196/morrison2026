@@ -3,14 +3,13 @@
  *
  * GET /api/iiif/:version/:id/manifest   (id = callNumber)
  *
- * Metadata comes from the morrison_bib ES index. Pages are enumerated by
- * probing the PTIF served from the Toyo Bunko image server img.toyobunko-lab.jp
- * (identifier `morrison_p/<group>/<callNumber>/<NNNN>.tif`). No Omeka — the
- * legacy `/api/media` dependency is gone, so the manifest no longer needs the
- * (now auth-gated, being-decommissioned) Omeka instance.
+ * Metadata comes from the morrison_bib ES index. Pages and their sizes come
+ * from src/data/page-dims.json, a scan of the PTIFs on the Toyo Bunko image
+ * server img.toyobunko-lab.jp (identifier
+ * `morrison_p/<group>/<callNumber>/<NNNN>.tif`), plus a short probe past the
+ * last scanned page. No Omeka — the legacy `/api/media` dependency is gone.
  *
- * Items not yet converted to clean PTIF (image migration in progress) yield
- * zero canvases → 404, and start working as the conversion reaches them.
+ * Items with no images on the image server yield zero canvases → 404.
  */
 
 import { NextRequest } from 'next/server'
@@ -22,16 +21,17 @@ import {
   type IIIFCanvasImage,
 } from '@toyo/shared-lib'
 import { ensureEnv } from '@/libs/cf-env'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { FULL_SIZE, imageServiceUrl } from '@/libs/iiif-image'
+import { listPages, type PageRuns } from '@/libs/manifest-pages'
+import pageDims from '@/data/page-dims.json'
 
 export const revalidate = 3600
 
 const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 
-// Page enumeration: probe pages concurrently in batches, stop when a whole
-// batch is absent. Gaps smaller than the batch are tolerated.
-const PROBE_BATCH = 8
-const MAX_PAGES = 800
+/** Image-server scan by scripts/build-page-dims.py (see libs/manifest-pages). */
+const KNOWN_PAGES = (pageDims as unknown as { items: Record<string, PageRuns> }).items
 
 /** Fetch the image server's info.json; returns dims when the page exists, else null. */
 async function probeIIIF(serviceUrl: string): Promise<{ width: number; height: number } | null> {
@@ -100,6 +100,13 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ version: string; id: string }> },
 ) {
+  // Repeat requests come from Cloudflare's cache (per data center, for the
+  // s-maxage in createIIIFHeaders). Absent outside the Worker runtime.
+  const cache = (globalThis as { caches?: { default?: Cache } }).caches?.default
+  const cacheKey = new Request(request.url)
+  const cached = await cache?.match(cacheKey)
+  if (cached) return cached
+
   ensureEnv()
   const { version, id } = await params
   const host = getHost(request)
@@ -121,30 +128,22 @@ export async function GET(
 
   const callNumber = (item.callNumber as string) || id
 
-  // Enumerate pages from the PTIF on the image server, in concurrent batches.
-  const canvases: IIIFCanvasImage[] = []
-  for (let start = 1; start <= MAX_PAGES; start += PROBE_BATCH) {
-    const batch = await Promise.all(
-      Array.from({ length: PROBE_BATCH }, (_, k) => {
-        const serviceUrl = imageServiceUrl(callNumber, start + k)
-        return probeIIIF(serviceUrl).then(dims => ({ serviceUrl, dims }))
-      }),
-    )
-    let any = false
-    for (const b of batch) {
-      if (!b.dims) continue
-      any = true
-      canvases.push({
-        imageUrl: `${b.serviceUrl}/full/${FULL_SIZE}/0/default.jpg`,
-        serviceUrl: b.serviceUrl,
-        width: b.dims.width,
-        height: b.dims.height,
-        format: 'image/jpeg',
-        thumbnailUrl: `${b.serviceUrl}/full/!200,200/0/default.jpg`,
-      })
+  // Pages from the image-server scan, plus any added past its last page.
+  const pages = await listPages(KNOWN_PAGES[callNumber], page =>
+    probeIIIF(imageServiceUrl(callNumber, page)),
+  )
+
+  const canvases: IIIFCanvasImage[] = pages.map(({ page, width, height }) => {
+    const serviceUrl = imageServiceUrl(callNumber, page)
+    return {
+      imageUrl: `${serviceUrl}/full/${FULL_SIZE}/0/default.jpg`,
+      serviceUrl,
+      width,
+      height,
+      format: 'image/jpeg',
+      thumbnailUrl: `${serviceUrl}/full/!200,200/0/default.jpg`,
     }
-    if (!any) break
-  }
+  })
 
   if (canvases.length === 0) {
     // Not yet converted (or no images). Becomes available as conversion reaches it.
@@ -184,16 +183,26 @@ export async function GET(
     hasAnnotations,
   })
 
+  let body = JSON.stringify(manifest)
+
   // v3 conversion
   if (version === '3') {
     try {
       const { convertPresentation2 } = await import('@iiif/parser/presentation-2')
-      const converted = repairDoubleEncodedIds(convertPresentation2(manifest))
-      return new Response(JSON.stringify(converted), { headers: createIIIFHeaders() })
+      body = JSON.stringify(repairDoubleEncodedIds(convertPresentation2(manifest)))
     } catch {
       // Fallback to v2 if parser not available
     }
   }
 
-  return new Response(JSON.stringify(manifest), { headers: createIIIFHeaders() })
+  const response = new Response(body, { headers: createIIIFHeaders() })
+  if (cache) {
+    const put = cache.put(cacheKey, response.clone())
+    try {
+      getCloudflareContext().ctx.waitUntil(put)
+    } catch {
+      await put
+    }
+  }
+  return response
 }
