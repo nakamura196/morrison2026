@@ -26,8 +26,7 @@ import { ensureEnv } from '@/libs/cf-env'
 
 export const revalidate = 3600
 
-const BIB_INDEX = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
-const OCR_INDEX = process.env.FULLTEXT_INDEX_NAME || 'morrison'
+import { BIB_INDEX, PAGE_INDEX as OCR_INDEX } from '@/config/indices'
 
 interface OcrLine {
   t: string

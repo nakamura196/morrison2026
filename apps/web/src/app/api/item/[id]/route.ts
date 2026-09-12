@@ -16,7 +16,7 @@ import { createHeaders } from '@/libs/api'
 
 export const revalidate = 3600
 
-const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+import { BIB_INDEX as INDEX_NAME } from '@/config/indices'
 const JSON_API_MEDIA_TYPE = 'application/vnd.api+json'
 
 export async function GET(

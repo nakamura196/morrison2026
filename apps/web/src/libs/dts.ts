@@ -22,8 +22,8 @@ export const DTS_CONTEXT = 'https://dtsapi.org/context/v1.0.json'
 /** Namespace for the <dts:wrapper> element used to wrap document fragments. */
 export const DTS_XML_NS = 'https://w3id.org/api/dts#'
 
-export const BIB_INDEX = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
-export const FULLTEXT_INDEX = process.env.FULLTEXT_INDEX_NAME || 'morrison'
+export { BIB_INDEX } from '@/config/indices'
+export { PAGE_INDEX as FULLTEXT_INDEX } from '@/config/indices'
 
 /** Root collection identifier and human label. */
 export const ROOT_ID = 'morrison'

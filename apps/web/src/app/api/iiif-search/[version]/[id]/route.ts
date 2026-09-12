@@ -3,7 +3,7 @@
  *
  * GET /api/iiif-search/:version/:id?q=keyword
  *
- * Searches the existing 'morrison' OCR index for matching pages
+ * Searches the page-text index (config/indices.ts の PAGE_INDEX) for matching pages
  * and returns results as IIIF Annotation List.
  */
 
@@ -18,8 +18,7 @@ import { ensureEnv } from '@/libs/cf-env'
 
 export const revalidate = 3600
 
-const OCR_INDEX = process.env.FULLTEXT_INDEX_NAME || 'morrison'
-const BIB_INDEX = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+import { BIB_INDEX, PAGE_INDEX as OCR_INDEX } from '@/config/indices'
 
 export async function GET(
   request: NextRequest,

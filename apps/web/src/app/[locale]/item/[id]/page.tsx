@@ -14,12 +14,13 @@ import ItemViewer from '@/components/pages/item/ItemViewer'
 import type { OcrPage } from '@/components/pages/item/BookViewer'
 import ItemShareExport from '@/components/pages/item/ItemShareExport'
 import { ensureEnv } from '@/libs/cf-env'
+import { BIB_INDEX, PAGE_INDEX } from '@/config/indices'
 import { itemHasFulltext } from '@/libs/fulltext'
 
 const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
   ensureEnv()
   const host = process.env.ES_URL || ''
-  const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+  const index = BIB_INDEX
 
   try {
     const response = await fetch(`${host}/${index}/_doc/${id}`, {
@@ -57,7 +58,7 @@ const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; r
 // longer serializes every page's coordinates into the initial HTML.
 const getOcrPages = cache(async (omekaId: string | number): Promise<OcrPage[]> => {
   ensureEnv()
-  const ocrIndex = process.env.FULLTEXT_INDEX_NAME || 'morrison'
+  const ocrIndex = PAGE_INDEX
   try {
     const data = await esSearch(ocrIndex, {
       size: 2000,
@@ -89,7 +90,7 @@ const getOcrPages = cache(async (omekaId: string | number): Promise<OcrPage[]> =
 const getIndexLastUpdated = cache(async (): Promise<number | null> => {
   ensureEnv()
   const host = process.env.ES_URL || ''
-  const index = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+  const index = BIB_INDEX
 
   try {
     const response = await fetch(`${host}/${index}/_settings`, {

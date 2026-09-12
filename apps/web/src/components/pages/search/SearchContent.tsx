@@ -15,10 +15,11 @@ import AdvancedSearch from './AdvancedSearch'
 import { advancedFilterLabels, searchFacetOptions } from '@/config/facets'
 import { SORT_OPTIONS, SORT_FIELD_CALL_NUMBER, parseSortValue, toSortValue } from '@/libs/sort-options'
 import { mediaThumbUrl } from '@/libs/media-image'
+import { BIB_INDEX } from '@/config/indices'
 
 type ViewMode = 'list' | 'grid'
 
-const indexName = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+const indexName = BIB_INDEX
 
 const connector = new ApiProxyConnector({
   basePath: `/api/${indexName}`,

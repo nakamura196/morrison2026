@@ -1,6 +1,7 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { highlightFields } from '@/config/search'
 import { buildBaseQuery, buildFilterClauses, type Filter } from '@/libs/search-query'
+import { BIB_INDEX } from '@/config/indices'
 
 export const runtime = 'nodejs'
 
@@ -268,7 +269,7 @@ export async function POST(
   const queryConfig = body.queryConfig
 
   // Validate index
-  const allowedIndices = (readEnv('ALLOWED_INDICES') || 'morrison_bib').split(',').map(s => s.trim())
+  const allowedIndices = (readEnv('ALLOWED_INDICES') || BIB_INDEX).split(',').map(s => s.trim())
   if (!allowedIndices.includes(index)) {
     return new Response(
       JSON.stringify({ error: 'Index not allowed' }),

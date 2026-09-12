@@ -28,7 +28,7 @@ import pageDims from '@/data/page-dims.json'
 
 export const revalidate = 3600
 
-const INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+import { BIB_INDEX as INDEX_NAME } from '@/config/indices'
 
 /** Image-server scan by scripts/build-page-dims.py (see libs/manifest-pages). */
 const KNOWN_PAGES = (pageDims as unknown as { items: Record<string, PageRuns> }).items

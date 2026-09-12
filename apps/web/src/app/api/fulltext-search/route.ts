@@ -13,8 +13,7 @@ import { ensureEnv } from '@/libs/cf-env'
 import { mediaThumbUrl } from '@/libs/media-image'
 import { buildFacetAggs, buildSearchQuery, NE_FIELDS, type SearchFilter } from '@/libs/fulltext-query'
 
-const INDEX_NAME = process.env.FULLTEXT_INDEX_NAME || 'morrison'
-const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
+import { BIB_INDEX as BIB_INDEX_NAME, PAGE_INDEX as INDEX_NAME } from '@/config/indices'
 
 /**
  * ヒットしたページのサムネ URL。s3ds のクリーンPTIF
