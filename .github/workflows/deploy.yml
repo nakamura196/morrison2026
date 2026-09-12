@@ -43,4 +43,8 @@ jobs:
       - name: Page smoke test (rendered HTML)
         env:
           BASE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          # 正式公開まで Basic 認証がかかっているので、確認もその鍵で入る。
+          # 認証を外したら、この 2 つの secret も消してよい (無くても動く)。
+          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
+          BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
         run: node apps/web/scripts/test-pages.js

@@ -9,6 +9,10 @@
  * ロケールは next-intl の localePrefix: 'as-needed' (apps/web/src/i18n/routing.ts)。
  * defaultLocale=ja は prefix なし (/about)、en は prefix あり (/en/about)。
  *
+ * 正式公開まで Basic 認証がかかっている (apps/web/src/middleware.ts)。
+ * BASIC_AUTH_USER / BASIC_AUTH_PASSWORD があれば付けて取りにいく。
+ * 無ければ付けない (認証を外したあともそのまま動く)。
+ *
  * 使い方:
  *   BASE_URL=https://morrison.toyobunko-lab.jp node apps/web/scripts/test-pages.js
  */
@@ -18,6 +22,13 @@ if (!BASE_URL) {
   console.error('BASE_URL env var is required (e.g. https://morrison.toyobunko-lab.jp)');
   process.exit(2);
 }
+
+const AUTH_USER = process.env.BASIC_AUTH_USER || '';
+const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD || '';
+const AUTH_HEADERS =
+  AUTH_USER && AUTH_PASS
+    ? { Authorization: 'Basic ' + Buffer.from(`${AUTH_USER}:${AUTH_PASS}`).toString('base64') }
+    : {};
 
 const PAGES = [
   '/',
@@ -47,9 +58,21 @@ async function checkPage(path) {
   const url = BASE_URL + path;
   let res;
   try {
-    res = await fetch(url, { redirect: 'follow' });
+    res = await fetch(url, { redirect: 'follow', headers: AUTH_HEADERS });
   } catch (e) {
     return { path, ok: false, reason: `fetch error: ${e.message}` };
+  }
+
+  if (res.status === 401) {
+    // 認証がかかっているのに鍵を渡せていない。ページの不具合ではないので
+    // 取り違えないよう、はっきり書く。
+    return {
+      path,
+      ok: false,
+      reason: AUTH_HEADERS.Authorization
+        ? 'status 401 (ID かパスワードが違います)'
+        : 'status 401 (BASIC_AUTH_USER / BASIC_AUTH_PASSWORD が渡っていません)',
+    };
   }
 
   if (!res.ok) {
