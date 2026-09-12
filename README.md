@@ -70,9 +70,33 @@ cp apps/web/.env.example apps/web/.env.local
 | `OMEKA_BASE_URL` | Omeka S base URL (server-side) |
 | `OMEKA_USER` | Omeka S username |
 | `OMEKA_PASSWORD` | Omeka S password |
-| `FULLTEXT_INDEX_NAME` | Fulltext search index (OCR pages, default: `morrison`) |
+| `FULLTEXT_INDEX_NAME` | Fulltext search index (OCR pages, default: `morrison_page`) |
 | `NEXT_PUBLIC_SITE_URL` | Public site URL |
 | `NEXT_PUBLIC_GA_ID` | Google Analytics ID (optional) |
+
+### 検索エンジンの索引名
+
+索引名は `<案件>_<役割>` で付ける。役割は決まった語だけを使う。
+
+| 索引 | 中身 | _id |
+|---|---|---|
+| `morrison_bib` | 書誌 (1 資料 = 1 doc) | 請求記号 |
+| `morrison_page` | ページ単位の本文 + 行の座標 | `<omeka_id>_<ページ>` |
+| `morrison_media` | 画像の台帳 (関係・順序・寸法) | `<請求記号>_<NNNN>` |
+
+- 役割語: `bib` / `page` / `media` / `item` / `annotation` / `news` / `docs`。
+  **案件名だけの索引名 (`morrison` のような) は作らない。** 同じサーバに
+  他案件の索引が 70 以上あり、何が入っているか名前で分かる必要がある
+  (他案件も `genji_page` `hi_page` `kano_page` と付けている)
+- 版を分けるときは末尾に `_v2`、試験用は先頭に `stg_`
+- **名前の正解は `apps/web/src/config/indices.ts` だけ。** コードのどこにも
+  べた書きしない (`src/config/indices.test.ts` が見張っている)
+- ⚠ Cloudflare Workers では `wrangler.jsonc` の `vars` は `process.env` に
+  入らない。**本番で使われるのは `config/indices.ts` の既定値**なので、
+  改名するときはコードを変えて配布する
+- 改名の手順 (ES は名前を変えられない): `_reindex` で複製 → 件数照合 →
+  コードの既定値を変えて配布 → 動作確認 → 旧索引を削除 → 互換の別名を張る。
+  2026-09-12 に `morrison` → `morrison_page` をこの手順で実施した
 
 ### Development
 
