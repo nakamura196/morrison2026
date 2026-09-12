@@ -41,11 +41,18 @@ const PAGES = [
   '/en/fulltext-search',
   '/news',
   '/en/news',
+  '/visualize',
+  '/en/visualize',
 ];
 
-// build 時 fetch が落ちて fallback が SSG 化されたときに現れるマーカー文字列。
-// morrison では現状該当マーカーは無いため空。必要になったら追加する。
-const FAIL_MARKERS = [];
+// build 時 fetch が落ちて fallback が SSG 化されたときや、検索エンジンに
+// 繋がらなかったときに現れる文字列。出ていたら失敗として扱う。
+// 可視化ページは集計を取れないと図の代わりにこの 1 行になる (200 で返るため、
+// 状態や大きさだけでは気づけない)。
+const FAIL_MARKERS = [
+  'ただいま集計を取得できませんでした',
+  'The figures could not be loaded just now',
+];
 
 // 各ページが正しく生成されていれば最低でもこのバイト数を超えるはず。
 // 極端に小さい場合は何かが欠落している。

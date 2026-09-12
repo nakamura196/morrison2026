@@ -39,6 +39,14 @@
 
   --color-line: #e0d8cf;
 
+  /* 図 (可視化ページ) の色。件数は面積と長さで示すので、色は 1 色だけ使う。
+     塗りの上の文字は白で固定 (白 / #76161b = 11.0:1)。 */
+  --color-chart-fill: var(--color-enji-700);
+  --color-chart-fill-hover: var(--color-enji-600);
+  --color-chart-track: var(--color-enji-100);
+  --color-chart-soft: var(--color-enji-50);
+  --color-chart-on-fill: #ffffff;
+
   /* Category accents (official taxonomy; badges use white text — see ACCESSIBILITY.md) */
   --color-museum: #573b21; /* 茶 — white 10.2:1 */
   --color-library: #1e3c69; /* 紺 — white 11.0:1 */
@@ -83,6 +91,14 @@
     --color-ink-subtle: #8f8a82;
 
     --color-line: #3a342d;
+
+    /* 暗い地の上では、同じ #76161b は地に沈む。1 段明るい step に置き換える
+       (白 / #a83f45 = 6.1:1、地 #26231f との差 = 2.6:1)。 */
+    --color-chart-fill: var(--color-enji-500);
+    --color-chart-fill-hover: var(--color-enji-400);
+    --color-chart-track: var(--color-enji-900);
+    --color-chart-soft: var(--color-enji-950);
+    --color-chart-on-fill: #ffffff;
   }
 
   :root {

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import configJa from '@/config.json'
 import configEn from '@/config.en.json'
 import ThemeToggle from '../../theme/theme-toggle'
-import { HiSearch, HiMenu, HiX, HiDocumentText, HiInformationCircle } from 'react-icons/hi'
+import { HiSearch, HiMenu, HiX, HiDocumentText, HiInformationCircle, HiChartPie } from 'react-icons/hi'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { ToggleLanguage } from './toggle-language'
@@ -43,6 +43,13 @@ export default function Header() {
             >
               <HiDocumentText className="w-5 h-5" />
               <span>{t('fulltextSearch')}</span>
+            </Link>
+            <Link
+              href="/visualize"
+              className="flex items-center space-x-1 text-ink-muted hover:text-brand transition-colors"
+            >
+              <HiChartPie className="w-5 h-5" />
+              <span>{t('visualize')}</span>
             </Link>
             <Link
               href="/about"
@@ -95,6 +102,14 @@ export default function Header() {
             >
               <HiDocumentText className="w-5 h-5" />
               <span>{t('fulltextSearch')}</span>
+            </Link>
+            <Link
+              href="/visualize"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-ink hover:bg-brand-soft"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <HiChartPie className="w-5 h-5" />
+              <span>{t('visualize')}</span>
             </Link>
             <Link
               href="/about"
