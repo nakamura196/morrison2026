@@ -11,7 +11,8 @@ import { SearchUI, SearchBox } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import { searchFields, resultFields } from '@/config/search'
 import Thumb from '@/components/ui/Thumb'
-import AdvancedSearch, { advancedFilterLabels } from './AdvancedSearch'
+import AdvancedSearch from './AdvancedSearch'
+import { advancedFilterLabels, searchFacetOptions } from '@/config/facets'
 import { SORT_OPTIONS, SORT_FIELD_CALL_NUMBER, parseSortValue, toSortValue } from '@/libs/sort-options'
 import { mediaThumbUrl } from '@/libs/media-image'
 
@@ -362,57 +363,7 @@ export default function SearchContent() {
   const tFacet = useTranslations('Facet')
   const tSearch = useTranslations('SearchPage')
 
-  const facetOptions: FacetOption[] = [
-    {
-      label: tFacet('classification'),
-      field: 'tag1',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('author'),
-      field: 'heading1.keyword',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('publicationYear'),
-      field: 'publication_year',
-      type: 'value',
-      size: 50,
-      sortField: 'value',
-    },
-    {
-      label: tFacet('hasImage'),
-      field: 'has_image',
-      type: 'value',
-      size: 10,
-    },
-    {
-      label: tFacet('persName'),
-      field: 'ne_persName',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('placeName'),
-      field: 'ne_placeName',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('orgName'),
-      field: 'ne_orgName',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('date'),
-      field: 'ne_date',
-      type: 'value',
-      size: 50,
-    },
-  ]
+  const facetOptions: FacetOption[] = searchFacetOptions(tFacet)
 
   // Create translations object for shared-ui
   const translations: SearchUITranslations = {

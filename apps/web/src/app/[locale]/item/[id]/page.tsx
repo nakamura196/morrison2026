@@ -14,6 +14,7 @@ import ItemViewer from '@/components/pages/item/ItemViewer'
 import type { OcrPage } from '@/components/pages/item/BookViewer'
 import ItemShareExport from '@/components/pages/item/ItemShareExport'
 import { ensureEnv } from '@/libs/cf-env'
+import { itemHasFulltext } from '@/libs/fulltext'
 
 const getData = cache(async (id: string): Promise<{ item: MorrisonItem | null; raw: Record<string, unknown> | null }> => {
   ensureEnv()
@@ -223,11 +224,11 @@ export default async function ItemPage({
   const omekaId = raw?.omeka_id as string | number | undefined
   const ocrPages = hasImages && omekaId != null ? await getOcrPages(omekaId) : []
 
-  // Fulltext availability gates the TEI/XML export. There's no `has_fulltext`
-  // field on morrison_bib yet (workflow §10 宿題), so derive it from whether any
-  // OCR page actually carries text — which is exactly what the DTS Document
-  // endpoint can serve.
-  const hasFulltext = ocrPages.some((p) => (p.text?.trim().length ?? 0) > 0)
+  // TEI/XML のダウンロードを出すかどうか。本文の正本は S3 の TEI で、
+  // その在否は morrison_bib の has_fulltext に入っている。ページ単位の本文
+  // (morrison 索引) の在否で判断すると、TEI があるのに入口が消える
+  // (2026-09-11、分類 IV・VI〜XVII の約1,900件がこれで消えていた)。
+  const hasFulltext = itemHasFulltext(item, ocrPages)
 
   const pageUrl = itemUrl(siteUrl, locale, id)
   const dateFormatter = new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {

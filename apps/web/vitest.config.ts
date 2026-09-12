@@ -9,7 +9,9 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    // 共有部品 (packages/shared-ui など) の試験もここで走らせる。置き場所が
+    // 別でも、走らなければ意味が無い (CI は apps/web の vitest だけを叩く)。
+    include: ['src/**/*.test.ts', '../../packages/shared-*/src/**/*.test.ts'],
     server: {
       deps: {
         // next-intl's ESM build imports `next/server` without an extension,

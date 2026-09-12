@@ -141,6 +141,7 @@
     "author": "著者",
     "publicationYear": "出版年",
     "hasImage": "画像あり",
+    "hasFulltext": "本文あり",
     "persName": "人名（本文）",
     "placeName": "地名（本文）",
     "orgName": "組織・団体（本文）",

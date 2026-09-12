@@ -5,6 +5,7 @@ import type { FilterValue, Filter } from '@elastic/search-ui'
 import ClearFilters from './ClearFilters'
 import { HiXCircle } from 'react-icons/hi'
 import type { FacetOption, SearchUITranslations, ThemeColor } from './types'
+import { filterValueLabel } from './filter-value'
 
 export default function Filters({
   fields,
@@ -27,11 +28,8 @@ export default function Filters({
    */
   const labelOf = (field: string): string =>
     fields.find(f => f.field === field)?.label ?? extraLabels?.[field] ?? field
-  const translateValue = (value: FilterValue): string => {
-    if (value === 1) return t.yes
-    if (value === 0) return t.no
-    return String(value)
-  }
+  const translateValue = (value: FilterValue): string =>
+    filterValueLabel(value, { yes: t.yes, no: t.no })
 
   const colorClasses = themeColor === 'amber'
     ? {

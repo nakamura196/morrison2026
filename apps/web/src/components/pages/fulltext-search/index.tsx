@@ -15,6 +15,7 @@ import {
 } from '@toyo/shared-ui'
 import type { FacetOption, SearchUITranslations } from '@toyo/shared-ui'
 import Results, { type ViewMode } from './Results'
+import { fulltextFacetOptions } from '@/config/facets'
 
 function ViewToggle({ viewMode, onChange }: { viewMode: ViewMode; onChange: (mode: ViewMode) => void }) {
   const t = useTranslations('SearchPage')
@@ -97,41 +98,7 @@ export default function FulltextSearch() {
   const tFacet = useTranslations('Facet')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
 
-  const facetOptions: FacetOption[] = [
-    {
-      label: t('bookTitle'),
-      field: 'item_title',
-      type: 'value',
-      showSearch: true,
-      size: 500,
-    },
-    {
-      label: tFacet('persName'),
-      field: 'ne_persName',
-      type: 'value',
-      showSearch: true,
-      size: 50,
-    },
-    {
-      label: tFacet('placeName'),
-      field: 'ne_placeName',
-      type: 'value',
-      showSearch: true,
-      size: 50,
-    },
-    {
-      label: tFacet('orgName'),
-      field: 'ne_orgName',
-      type: 'value',
-      size: 50,
-    },
-    {
-      label: tFacet('date'),
-      field: 'ne_date',
-      type: 'value',
-      size: 50,
-    },
-  ]
+  const facetOptions: FacetOption[] = fulltextFacetOptions(t, tFacet)
 
   const sortOptions = [
     { name: t('sortRelevance'), value: '_score', direction: 'desc' },

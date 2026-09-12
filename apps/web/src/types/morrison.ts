@@ -20,6 +20,8 @@ export interface MorrisonItem {
   holding?: string
   references?: string
   has_image?: boolean
+  /** 本文 (S3 の TEI) があるか。scripts/set-has-fulltext.py が立てる。 */
+  has_fulltext?: boolean
   publication_year?: string
   language?: string[]
   thumbnail_urls?: {

@@ -15,14 +15,7 @@
 import { useState } from 'react'
 import { WithSearch } from '@elastic/react-search-ui'
 import type { SearchContextState, FilterType, FilterValue, Filter } from '@elastic/search-ui'
-
-/** 画面に出す項目と、検索エンジン側の項目名の対応。 */
-export const FIELDS = [
-  { field: 'title', labelKey: 'advTitle' },
-  { field: 'heading1', labelKey: 'advAuthor' },
-  { field: 'publication', labelKey: 'advPublication' },
-  { field: 'callNumber', labelKey: 'advCallNumber' },
-] as const
+import { ADVANCED_FIELDS as FIELDS } from '@/config/facets'
 
 type Values = Record<string, string>
 
@@ -141,16 +134,6 @@ function Panel({
       )}
     </div>
   )
-}
-
-/**
- * 絞り込み中の表示 (フィルタ) に出す見出し。
- *
- * フィルタの見出しはファセットの一覧から引いているが、ここの項目はファセット
- * ではないので引けず、`: travel` のように空欄になっていた。項目名を渡して補う。
- */
-export function advancedFilterLabels(t: (key: string) => string): Record<string, string> {
-  return Object.fromEntries(FIELDS.map(f => [f.field, t(f.labelKey)]))
 }
 
 export default function AdvancedSearch({ t }: { t: (key: string) => string }) {

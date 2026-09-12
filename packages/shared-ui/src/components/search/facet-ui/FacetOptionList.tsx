@@ -1,6 +1,7 @@
 'use client';
 
 import type { FacetValue, FieldValue } from './types';
+import { filterValueLabel } from '../filter-value';
 
 interface FacetOptionListTranslations {
   available?: string;
@@ -34,11 +35,11 @@ export function FacetOptionList({
     notAvailable: t.notAvailable || 'なし',
   };
 
-  const translateValue = (value: FacetValue['value']): string => {
-    if (value === 1) return translations.available;
-    if (value === 0) return translations.notAvailable;
-    return String(value);
-  };
+  const translateValue = (value: FacetValue['value']): string =>
+    filterValueLabel(value, {
+      yes: translations.available,
+      no: translations.notAvailable,
+    });
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">

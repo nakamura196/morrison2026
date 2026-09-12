@@ -141,6 +141,7 @@
     "author": "Author",
     "publicationYear": "Publication Year",
     "hasImage": "Has Image",
+    "hasFulltext": "Has Full Text",
     "persName": "Person (in text)",
     "placeName": "Place (in text)",
     "orgName": "Organization (in text)",

@@ -1,0 +1,34 @@
+name: data-check
+
+# 週次のデータ点検。画面の作りではなくデータの食い違いを見る。
+#
+# 2026-09-11、「本文あり」と出るのに本文が出ない資料が 1,869 件あった。
+# 本文の置き場所が 2 つあり (S3 の TEI と検索エンジンの索引)、片方しか
+# 埋まっていなかった。部品ごとの試験では捉えられないので、公開 API を
+# 実際に叩いて抜き取り検査する。直し方は docs/fulltext-coverage.md。
+
+on:
+  schedule:
+    - cron: '30 22 * * 0' # JST 月曜 07:30
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fulltext-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+
+      - name: 本文ありの資料から本文が返るか (分類ごとに抜き取り)
+        env:
+          BASE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          # API は Basic 認証の対象外だが、将来かかっても動くように渡しておく。
+          BASIC_AUTH_USER: ${{ secrets.BASIC_AUTH_USER }}
+          BASIC_AUTH_PASSWORD: ${{ secrets.BASIC_AUTH_PASSWORD }}
+        run: node apps/web/scripts/test-fulltext-coverage.js
