@@ -4,11 +4,12 @@ import {
   HiSearch,
   HiDocumentText,
   HiCode,
+  HiChartPie,
   HiInformationCircle,
   HiArrowNarrowRight,
 } from 'react-icons/hi'
 
-/** The four entry points into the database, shown as cards under the hero. */
+/** The entry points into the database, shown as cards under the hero. */
 export default async function FeatureCards() {
   const t = await getTranslations('HomePage')
 
@@ -26,6 +27,13 @@ export default async function FeatureCards() {
       title: t('featureFulltextTitle'),
       description: t('featureFulltextDescription'),
       cta: t('featureFulltextCta'),
+    },
+    {
+      href: '/visualize',
+      Icon: HiChartPie,
+      title: t('featureVisualizeTitle'),
+      description: t('featureVisualizeDescription'),
+      cta: t('featureVisualizeCta'),
     },
     {
       href: '/api-docs',
@@ -53,7 +61,7 @@ export default async function FeatureCards() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map(({ href, Icon, title, description, cta }) => (
             <Link
               key={href}
