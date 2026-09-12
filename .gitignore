@@ -81,3 +81,6 @@ Thumbs.db
 # playwright
 /apps/web/test-results/
 /apps/web/playwright-report/
+
+# vision-ocr の実行ファイル (swiftc で作る。中身はソースのみ管理)
+tools/vision-ocr/vision-ocr

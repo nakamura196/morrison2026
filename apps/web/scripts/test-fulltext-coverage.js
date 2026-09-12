@@ -60,7 +60,13 @@ async function search(state, queryConfig = {}) {
   return res.json();
 }
 
-/** その資料の本文が、ビューアの読む経路から返るか。 */
+/**
+ * その資料の本文が、ビューアの読む経路から返るか。
+ *
+ * 戻り値の `lines` は、行ごとの位置があるか (2 つ以上の注釈が返るか) を表す。
+ * 位置が無いと画像内のハイライトができない。本文があれば合格だが、
+ * 位置の有無も出しておき、あとから減っていないかを見られるようにする。
+ */
 async function hasOcrText(callNumber) {
   for (let page = 1; page <= PAGES; page++) {
     const res = await fetch(
@@ -69,9 +75,11 @@ async function hasOcrText(callNumber) {
     );
     if (!res.ok) continue;
     const body = await res.json();
-    if (Array.isArray(body.items) && body.items.length > 0) return true;
+    if (Array.isArray(body.items) && body.items.length > 0) {
+      return { text: true, lines: body.items.length > 1 };
+    }
   }
-  return false;
+  return { text: false, lines: false };
 }
 
 async function main() {
@@ -109,12 +117,14 @@ async function main() {
       .map(r => r.callNumber?.raw || r._meta?.id)
       .filter(Boolean);
     const flags = [];
-    for (const id of ids) flags.push({ id, ocr: await hasOcrText(id) });
-    const ok = flags.filter(f => f.ocr).length;
+    for (const id of ids) flags.push({ id, ...(await hasOcrText(id)) });
+    const ok = flags.filter(f => f.text).length;
+    const withLines = flags.filter(f => f.lines).length;
     const mark = ok > 0 ? '✅' : '✗';
     console.log(
       `${mark} ${tag1}  (本文あり ${String(count).padStart(5)} 件)  抜き取り ${ok}/${flags.length}` +
-        `  ${flags.map(f => `${f.id}${f.ocr ? '' : '(本文なし)'}`).join(' ')}`,
+        `  行の位置 ${withLines}/${flags.length}` +
+        `  ${flags.map(f => `${f.id}${f.text ? (f.lines ? '' : '(位置なし)') : '(本文なし)'}`).join(' ')}`,
     );
     if (ok === 0) missing.push({ tag1, count, ids });
   }
@@ -126,7 +136,8 @@ async function main() {
       `✗ ${missing.length} 区分 (「本文あり」計 ${affected.toLocaleString()} 件) で本文が返りません。`,
     );
     console.error('  → 検索エンジンの morrison 索引にページが入っていません。');
-    console.error('     scripts/index-ocr-from-tei.py で TEI から入れ直してください');
+    console.error('     scripts/index-ocr-from-tei.py (TEI から) か');
+    console.error('     scripts/ocr-apple-vision.py (Mac で OCR し直す) で入れ直してください');
     console.error('     (手順は docs/fulltext-coverage.md)。');
     for (const m of missing) console.error(`     - ${m.tag1} (${m.count} 件): ${m.ids.join(', ')}`);
     process.exit(1);
