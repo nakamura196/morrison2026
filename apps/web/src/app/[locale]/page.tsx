@@ -29,7 +29,11 @@ export default async function Home({
       {/* flex-1 keeps the footer on the bottom edge when the page is shorter
           than the viewport. */}
       <main className="flex-1">
-        {/* Hero section — photo-forward with a fixed enji wash (no theme flip). */}
+        {/* Hero section — photo-forward with a fixed enji wash (no theme flip).
+          背景は本コレクションの資料そのもの。P-III-a-0073 "Map of China and its
+          territories" (National Geographic Magazine 所載、Bartholomew 製図) の
+          1 コマ目から、定規と余白を除いた中央部分を切り出したもの。差し替えるときは
+          臙脂のグラデーションが上に乗る前提で、線の詰まった面を選ぶ。 */}
         <div className="relative bg-enji-900">
           <div
             className="absolute inset-0 bg-cover bg-center"
