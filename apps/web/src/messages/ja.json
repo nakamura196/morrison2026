@@ -157,7 +157,25 @@
   },
   "HomePage": {
     "title": "ホーム",
-    "startSearch": "検索を開始"
+    "startSearch": "検索を開始",
+    "startFulltextSearch": "全文検索を試す",
+    "featuresTitle": "このデータベースでできること",
+    "featuresDescription": "目録から探す、本文から探す、データとして受け取る。用途に合わせて入口をお選びください。",
+    "featureSearchTitle": "目録から探す",
+    "featureSearchDescription": "書名・著者・請求記号・分類などの項目で絞り込み、パンフレットを一覧できます。",
+    "featureSearchCta": "検索する",
+    "featureFulltextTitle": "本文から探す",
+    "featureFulltextDescription": "OCR で読み取った本文を全文検索します。ヒットした箇所は画像上で強調表示されます。",
+    "featureFulltextCta": "全文検索する",
+    "featureApiTitle": "データとして使う",
+    "featureApiDescription": "IIIF・DTS・JSON の API を公開しています。画像や本文を他のビューアや研究ツールから利用できます。",
+    "featureApiCta": "API を見る",
+    "featureAboutTitle": "このデータベースについて",
+    "featureAboutDescription": "モリソンパンフレットの成り立ちと、本データベースの編集方針をご紹介します。",
+    "featureAboutCta": "解説を読む",
+    "newsTitle": "お知らせ",
+    "newsDescription": "公開・更新の情報をお知らせします。",
+    "viewAllNews": "お知らせ一覧へ"
   },
   "Search": {
     "noResults": "検索結果が見つかりませんでした。",

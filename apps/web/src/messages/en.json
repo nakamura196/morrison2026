@@ -157,7 +157,25 @@
   },
   "HomePage": {
     "title": "Home",
-    "startSearch": "Start Search"
+    "startSearch": "Start Search",
+    "startFulltextSearch": "Try Fulltext Search",
+    "featuresTitle": "What you can do here",
+    "featuresDescription": "Search the catalogue, search the text itself, or take the data away with you.",
+    "featureSearchTitle": "Search the catalogue",
+    "featureSearchDescription": "Narrow by title, author, call number and classification to browse the pamphlets.",
+    "featureSearchCta": "Search",
+    "featureFulltextTitle": "Search the text",
+    "featureFulltextDescription": "Search OCR text across the collection. Matches are highlighted on the page images.",
+    "featureFulltextCta": "Fulltext search",
+    "featureApiTitle": "Use it as data",
+    "featureApiDescription": "IIIF, DTS and JSON APIs let you use the images and text in other viewers and research tools.",
+    "featureApiCta": "View the API",
+    "featureAboutTitle": "About this database",
+    "featureAboutDescription": "How the Morrison Pamphlets came together, and how this database is compiled.",
+    "featureAboutCta": "Read more",
+    "newsTitle": "News",
+    "newsDescription": "Announcements about releases and updates.",
+    "viewAllNews": "See all news"
   },
   "Search": {
     "noResults": "No results found.",
