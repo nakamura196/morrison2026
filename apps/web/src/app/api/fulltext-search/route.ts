@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { esSearch } from '@toyo/shared-lib'
 import { ensureEnv } from '@/libs/cf-env'
 import { mediaThumbUrl } from '@/libs/media-image'
+import { buildFacetAggs, buildSearchQuery, NE_FIELDS, type SearchFilter } from '@/libs/fulltext-query'
 
 const INDEX_NAME = process.env.FULLTEXT_INDEX_NAME || 'morrison'
 const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
@@ -23,12 +24,6 @@ const BIB_INDEX_NAME = process.env.NEXT_PUBLIC_INDEX_NAME || 'morrison_bib'
 function buildPageThumbnailUrl(callNumber: string, page: string | number): string {
   if (!callNumber || page === '' || page === undefined || page === null) return ''
   return mediaThumbUrl(callNumber, page, 300)
-}
-
-interface SearchFilter {
-  field: string
-  values: (string | number | boolean)[]
-  type?: string
 }
 
 interface SearchState {
@@ -89,76 +84,6 @@ async function getValidItemIds(): Promise<string[]> {
   return ids
 }
 
-function buildSearchQuery(
-  searchTerm: string,
-  filters?: SearchFilter[],
-  neItemIds?: string[],
-  validItemIds?: string[],
-): Record<string, unknown> {
-  const must: Record<string, unknown>[] = []
-  const filter: Record<string, unknown>[] = []
-
-  if (searchTerm) {
-    must.push({
-      match_phrase: {
-        text: searchTerm,
-      },
-    })
-  } else {
-    must.push({ match_all: {} })
-  }
-
-  // 書誌に存在するアイテムのみ(リンク・画像が必ずある結果に絞る)
-  if (validItemIds && validItemIds.length > 0) {
-    filter.push({ terms: { 'item_id.keyword': validItemIds } })
-  }
-
-  // Apply filters
-  if (filters) {
-    for (const f of filters) {
-      if (f.field === 'item_title' && f.values.length > 0) {
-        // Title filter uses item_id lookup (resolved in facet)
-        filter.push({
-          terms: { 'title.keyword': f.values },
-        })
-      } else if (f.field === 'item_id' && f.values.length > 0) {
-        filter.push({
-          terms: { item_id: f.values },
-        })
-      }
-    }
-  }
-
-  // ne_* (固有表現) ファセットは morrison_bib 側にあるため、ハンドラで該当
-  // item_id 群に解決済み。ページ索引クエリをその item_id に制限する
-  // (空配列なら 0 件 = 該当なしの絞り込み)。
-  if (neItemIds) {
-    filter.push({ terms: { 'item_id.keyword': neItemIds } })
-  }
-
-  return {
-    bool: {
-      must,
-      ...(filter.length > 0 ? { filter } : {}),
-    },
-  }
-}
-
-// 選択された ne_* ファセット → 該当アイテムの item_id (= omeka id 文字列) に解決
-const NE_FIELDS = ['ne_persName', 'ne_placeName', 'ne_orgName', 'ne_date'] as const
-
-async function resolveNeItemIds(neFilters: SearchFilter[]): Promise<string[]> {
-  const bibData = await esSearch(BIB_INDEX_NAME, {
-    size: 10000,
-    _source: ['omeka_id'],
-    query: { bool: { filter: neFilters.map((f) => ({ terms: { [f.field]: f.values } })) } },
-  })
-  const hits = (bibData.hits?.hits || []) as Array<{ _source: { omeka_id?: number } }>
-  return hits
-    .map((h) => String(h._source.omeka_id))
-    .filter((s) => s && s !== 'undefined')
-}
-
 function buildSortConfig(
   searchTerm: string,
   sortField?: string,
@@ -211,17 +136,11 @@ export async function POST(request: NextRequest) {
   const from = (current - 1) * resultsPerPage
 
   const sort = buildSortConfig(searchTerm, state.sortField, state.sortDirection)
-  const allFilters = state.filters || []
-  const neFilters = allFilters.filter((f) => f.field.startsWith('ne_'))
-  const pageFilters = allFilters.filter((f) => !f.field.startsWith('ne_'))
+  const filters: SearchFilter[] = state.filters || []
 
   try {
-    // 選択中の固有表現 → 該当 item_id に解決してページ索引クエリへ反映
-    const [neItemIds, validItemIds] = await Promise.all([
-      neFilters.length > 0 ? resolveNeItemIds(neFilters) : Promise.resolve(undefined),
-      getValidItemIds(),
-    ])
-    const query = buildSearchQuery(searchTerm, pageFilters, neItemIds, validItemIds)
+    const validItemIds = await getValidItemIds()
+    const query = buildSearchQuery(searchTerm, filters, validItemIds)
 
     const searchBody: Record<string, unknown> = {
       query,
@@ -296,29 +215,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Build facets via aggregation query
-    const facetBody: Record<string, unknown> = {
+    // ファセット。人名・地名などもページ索引の上で集計するので、件数はページ数
+    const facetData = await esSearch(INDEX_NAME, {
       query,
       size: 0,
-      aggs: {
-        item_titles: {
-          terms: {
-            field: 'title.keyword',
-            size: 500,
-          },
-        },
-        // この全文検索にマッチしたアイテム (omeka id) 群。ne_* 集計の対象に使う
-        matched_items: {
-          terms: {
-            field: 'item_id.keyword',
-            size: 10000,
-          },
-        },
-      },
-    }
-
-    const facetData = await esSearch(INDEX_NAME, facetBody) as Record<string, unknown>
-    const aggs = facetData.aggregations as Record<string, { buckets: { key: string; doc_count: number }[] }> | undefined
+      aggs: buildFacetAggs(),
+    }) as Record<string, unknown>
+    const aggs = facetData.aggregations as Record<string, { buckets?: { key: string; doc_count: number }[] }> | undefined
     const titleBuckets = aggs?.item_titles?.buckets || []
 
     const titleFacets = titleBuckets.map((bucket: { key: string; doc_count: number }) => ({
@@ -326,24 +229,11 @@ export async function POST(request: NextRequest) {
       count: bucket.doc_count,
     }))
 
-    // 固有表現ファセット (クロス索引): マッチしたアイテム範囲で morrison_bib の
-    // ne_* を集計する。
-    const matchedOmeka = (aggs?.matched_items?.buckets || []).map((b) => b.key)
     const entityFacets: Record<string, Array<{ type: string; data: { value: string; count: number }[] }>> = {}
-    if (matchedOmeka.length > 0) {
-      const neAggs: Record<string, unknown> = {}
-      for (const f of NE_FIELDS) neAggs[f] = { terms: { field: f, size: 50 } }
-      const neData = (await esSearch(BIB_INDEX_NAME, {
-        size: 0,
-        query: { terms: { omeka_id: matchedOmeka.map(Number) } },
-        aggs: neAggs,
-      })) as Record<string, unknown>
-      const na = (neData.aggregations || {}) as Record<string, { buckets?: { key: string; doc_count: number }[] }>
-      for (const f of NE_FIELDS) {
-        const buckets = na[f]?.buckets || []
-        if (buckets.length > 0) {
-          entityFacets[f] = [{ type: 'value', data: buckets.map((b) => ({ value: b.key, count: b.doc_count })) }]
-        }
+    for (const f of NE_FIELDS) {
+      const buckets = aggs?.[f]?.buckets || []
+      if (buckets.length > 0) {
+        entityFacets[f] = [{ type: 'value', data: buckets.map((b) => ({ value: b.key, count: b.doc_count })) }]
       }
     }
 
