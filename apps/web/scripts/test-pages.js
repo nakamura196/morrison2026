@@ -30,6 +30,8 @@ const AUTH_HEADERS =
     ? { Authorization: 'Basic ' + Buffer.from(`${AUTH_USER}:${AUTH_PASS}`).toString('base64') }
     : {};
 
+// path だけ、または { path, requires } で書く。
+// requires はそのページの HTML に必ず入っているべき文字列。
 const PAGES = [
   '/',
   '/en',
@@ -41,18 +43,21 @@ const PAGES = [
   '/en/fulltext-search',
   '/news',
   '/en/news',
-  '/visualize',
-  '/en/visualize',
+  // 可視化ページは集計を検索エンジンから取る。繋がらなくても 200 で返り、
+  // 図の代わりに 1 行の断りが出るだけなので、状態と大きさでは気づけない。
+  // 図が組み上がったときにだけ出る目印で見る。
+  { path: '/visualize', requires: 'id="classification"' },
+  { path: '/en/visualize', requires: 'id="classification"' },
 ];
 
-// build 時 fetch が落ちて fallback が SSG 化されたときや、検索エンジンに
-// 繋がらなかったときに現れる文字列。出ていたら失敗として扱う。
-// 可視化ページは集計を取れないと図の代わりにこの 1 行になる (200 で返るため、
-// 状態や大きさだけでは気づけない)。
-const FAIL_MARKERS = [
-  'ただいま集計を取得できませんでした',
-  'The figures could not be loaded just now',
-];
+// build 時 fetch が落ちて fallback が SSG 化されたときに現れるマーカー文字列。
+// morrison では現状該当マーカーは無いため空。必要になったら追加する。
+//
+// 「失敗時に出る文言」をここに足してはいけない。画面の文言は next-intl の
+// 翻訳一式として全ページの HTML に載るため、出ていないページでも見つかる
+// (2026-09-11、可視化ページの断り文を入れて 12 ページ全部が失敗した)。
+// 失敗を捉えたいときは、上の requires で「成功時にだけ出るもの」を見る。
+const FAIL_MARKERS = [];
 
 // 各ページが正しく生成されていれば最低でもこのバイト数を超えるはず。
 // 極端に小さい場合は何かが欠落している。
@@ -61,7 +66,8 @@ const MIN_BYTES = 5000;
 const ANSI = { reset: '\x1b[0m', green: '\x1b[32m', red: '\x1b[31m', dim: '\x1b[2m' };
 const color = (c, s) => ANSI[c] + s + ANSI.reset;
 
-async function checkPage(path) {
+async function checkPage(page) {
+  const { path, requires } = typeof page === 'string' ? { path: page } : page;
   const url = BASE_URL + path;
   let res;
   try {
@@ -94,6 +100,10 @@ async function checkPage(path) {
 
   if (html.length < MIN_BYTES) {
     return { path, ok: false, reason: `body too small (${html.length}B < ${MIN_BYTES}B)` };
+  }
+
+  if (requires && !html.includes(requires)) {
+    return { path, ok: false, reason: `missing required content: "${requires}"` };
   }
 
   return { path, ok: true, status: res.status, bytes: html.length };
