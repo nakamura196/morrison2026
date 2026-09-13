@@ -25,6 +25,7 @@ import OpenSeadragonViewer, {
   type ViewerHighlight,
 } from './OpenSeadragonViewer'
 import Thumb from '@/components/ui/Thumb'
+import { IMAGE_FORMAT } from '@/libs/iiif-image'
 
 export interface OcrLine {
   text: string
@@ -63,8 +64,9 @@ interface PageMatch {
 }
 type Tab = 'hits' | 'pages' | 'ocr'
 
+/** ページ一覧のサムネイル。形式は libs/iiif-image.ts の IMAGE_FORMAT に従う。 */
 function thumbUrl(serviceId: string): string {
-  return `${serviceId}/full/!400,400/0/default.jpg`
+  return `${serviceId}/full/!400,400/0/default.${IMAGE_FORMAT}`
 }
 
 /** Highlight literal occurrences of `term` in `text`. */

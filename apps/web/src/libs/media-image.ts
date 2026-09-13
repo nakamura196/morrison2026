@@ -7,7 +7,7 @@
  *
  * URL の組み立ては libs/iiif-image.ts に集約している。
  */
-import { PUBLIC_IMAGE_IIIF_BASE, imageIdentifier, imageServiceUrl } from './iiif-image'
+import { IMAGE_FORMAT, PUBLIC_IMAGE_IIIF_BASE, imageIdentifier, imageServiceUrl } from './iiif-image'
 
 export { imageIdentifier as mediaImageId }
 
@@ -17,5 +17,5 @@ export { imageIdentifier as mediaImageId }
  */
 export function mediaThumbUrl(callNumber: string | undefined, page: number | string = 1, size = 300): string {
   if (!callNumber) return ''
-  return `${imageServiceUrl(callNumber, page, PUBLIC_IMAGE_IIIF_BASE)}/full/!${size},${size}/0/default.jpg`
+  return `${imageServiceUrl(callNumber, page, PUBLIC_IMAGE_IIIF_BASE)}/full/!${size},${size}/0/default.${IMAGE_FORMAT}`
 }
