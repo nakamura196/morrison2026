@@ -13,8 +13,13 @@
  *  2. 原寸は `full/full`（IIIF Image API 2 の書き方）。`full/max` は 3 の書き方で、
  *     iipsrv は 400 を返す。
  *
- * iipsrv (2021 ビルド) が返す info.json は Image API 2 のみ。manifest 側の
- * image service も元から 2 で書いているため、そちらの変更は要らない。
+ * 画像サーバは 2026-09-14 に iipsrv 1.2 へ更新し、次の状態になっている。
+ *   - `/iiif/` は Image API 2 を返す (`IIIF_VERSION "2"` で固定)。manifest の
+ *     image service も 2 のままなので、そちらの変更は要らない
+ *   - `/iiif3/` は Image API 3 を返す (v3 のクライアント向け)
+ *   - 出力形式は jpg / png / webp。WebP は JPEG より小さい (実測: タイル
+ *     512x512 が 3,713 → 937 バイト。これは既定の品質どうしの比較で、品質の
+ *     数値を 90 に揃えても約 26% 減)
  */
 
 /** 既定は東洋文庫の画像サーバ。差し替えたいときだけ環境変数で上書きする。 */
@@ -30,6 +35,21 @@ export const PUBLIC_IMAGE_IIIF_BASE = (
 
 /** 原寸の指定。iipsrv は IIIF Image API 2 なので `max` ではなく `full`。 */
 export const FULL_SIZE = 'full'
+
+/**
+ * サムネイルとタイルに使う画像形式。
+ *
+ * WebP は JPEG より小さく (実測で元の 25〜45%)、対応していないブラウザは
+ * ほぼ無いが、切り戻せるように 1 か所にまとめて環境変数で変えられるようにする。
+ * `jpg` に戻すときは `NEXT_PUBLIC_IMAGE_FORMAT=jpg` を設定して配布する。
+ *
+ * ビューア (OpenSeadragon) 側は info.json に `preferredFormats` を足して渡す
+ * 形にしている。OSD 6.0.2 は `preferredFormats` を見て `tileFormat` を決めるが、
+ * 「使えるか」の判定は固定表 (`FILEFORMATS`) で、ブラウザの実機能は見ていない
+ * (openseadragon.js の imageFormatSupported)。WebP は Safari 14 (2020) 以降
+ * すべての現行ブラウザが表示できるので実害はないが、自動では jpg に落ちない。
+ */
+export const IMAGE_FORMAT = (process.env.NEXT_PUBLIC_IMAGE_FORMAT || 'webp') as 'webp' | 'jpg'
 
 /** グループ名 = 請求記号の先頭 2 区切り (`P-III-a-0083` → `P-III`)。 */
 export function deriveGroup(callNumber: string): string {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useImperativeHandle, useRef, forwardRef } from 'react'
+import { IMAGE_FORMAT } from '@/libs/iiif-image'
 
 /**
  * Minimal OpenSeadragon viewer for a single IIIF info.json. Loaded client-side
@@ -120,10 +121,28 @@ const OpenSeadragonViewer = forwardRef<ViewerApi, ViewerProps>(function OpenSead
     ;(async () => {
       const OpenSeadragon = (await import('openseadragon')).default
       if (cancelled || !ref.current) return
+
+      // タイルを WebP で取る。画像サーバ (iipsrv 1.2) は jpg / png / webp を
+      // 出せるが、info.json に `preferredFormats` を書かない。そこで info.json
+      // を自分で取り、`preferredFormats` を足した形で OSD に渡す。OSD はこれを
+      // 見て `tileFormat` を webp にする (openseadragon 6.0.2)。タイル 1 枚は
+      // 3,713 → 937 バイトになった (2026-09-14 実測)。
+      // 取得に失敗したときは URL をそのまま渡す (従来どおり jpg になる)。
+      let tileSources: string | Record<string, unknown> = infoUrl
+      if (IMAGE_FORMAT === 'webp') {
+        try {
+          const info = await fetch(infoUrl).then(r => (r.ok ? r.json() : null))
+          if (info) tileSources = { ...info, preferredFormats: ['webp'] }
+        } catch {
+          // そのまま infoUrl を使う
+        }
+      }
+      if (cancelled || !ref.current) return
+
       const v = OpenSeadragon({
         element: ref.current,
         prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@6.0.2/build/openseadragon/images/',
-        tileSources: infoUrl,
+        tileSources,
         showNavigator: false,
         showRotationControl: true,
         gestureSettingsMouse: { clickToZoom: false, dblClickToZoom: true },
